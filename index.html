@@ -296,6 +296,9 @@
   .timer-btns{ display:flex; gap:10px; justify-content:center; }
   .qf-timer-btn{ background:var(--gold); color:#111; font-weight:bold; padding:10px 26px; border:none; }
   .qf-timer-reset{ padding:10px 18px; }
+  .qf-date-field{ display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+  .qf-date-field label{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+  .qf-date-field input{ padding:10px 8px; font-size:14px; }
   .qf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; margin-bottom:6px; }
   .qf-field{ display:flex; flex-direction:column; gap:5px; }
   .qf-field label{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
@@ -358,6 +361,11 @@
         <button type="button" id="timerStartBtn" class="qf-timer-btn" onclick="timerToggle()">Avvia</button>
         <button type="button" class="qf-timer-reset" onclick="timerReset()">Reset</button>
       </div>
+    </div>
+
+    <div class="qf-field qf-date-field">
+      <label>Data shot</label>
+      <input type="date" id="qfDate">
     </div>
 
     <div class="qf-grid">
@@ -713,6 +721,7 @@ function toggleAdvanced(){
 }
 function qfPrefill(){
   const last = rows.length ? rows[rows.length - 1] : null;
+  document.getElementById('qfDate').value = todayStr();
   document.getElementById('qfGrind').value = last ? (last.grind || '') : '';
   document.getElementById('qfDose').value = last ? (last.dose || '') : '';
   document.getElementById('qfBag').value = last ? (last.bagOpenDate || '') : '';
@@ -743,7 +752,7 @@ function saveQuickShot(){
 
   rows.push({
     id: Date.now() + Math.random(),
-    date: todayStr(),
+    date: document.getElementById('qfDate').value || todayStr(),
     bagOpenDate: document.getElementById('qfBag').value || '',
     hopperFillDate: document.getElementById('qfHopper').value || '',
     grind, recommendedGrind: document.getElementById('qfGrindCons').value,
