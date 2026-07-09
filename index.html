@@ -234,6 +234,70 @@
   .note-btn{ width:100%; height:34px; padding:0 10px; background:#0f0f0f; color:var(--cream); border:1px solid var(--line); border-radius:3px; font-size:12px; font-family:Arial,sans-serif; text-align:left; cursor:pointer; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; display:block; }
   .note-btn.has-note{ color:var(--gold); border-color:var(--gold-dim); }
   input.note{ display:none; }
+
+  /* ===== Tab navigation (app shell) ===== */
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+  body{ padding-bottom:78px; }
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:150;
+    display:flex; background:var(--panel2); border-top:1px solid var(--gold-dim);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar button{
+    flex:1; background:none; border:none; border-radius:0; color:var(--muted);
+    padding:12px 4px 10px; font-size:11px; text-transform:uppercase; letter-spacing:.4px;
+    font-family:Arial, sans-serif;
+  }
+  .tabbar button:hover{ background:none; color:var(--cream); }
+  .tabbar button.active{ color:var(--gold); font-weight:bold; }
+  #panel-analysis .dash{ margin-top:6px; }
+
+  /* ===== Nuovo shot (quick entry) ===== */
+  .qf-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:16px; font-family:Arial, sans-serif; max-width:480px;
+  }
+  .timer-box{ text-align:center; margin-bottom:18px; }
+  .timer-display{ font-size:44px; color:var(--gold); font-weight:bold; letter-spacing:1px; margin-bottom:10px; }
+  .timer-btns{ display:flex; gap:10px; justify-content:center; }
+  .qf-timer-btn{ background:var(--gold); color:#111; font-weight:bold; padding:10px 26px; border:none; }
+  .qf-timer-reset{ padding:10px 18px; }
+  .qf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; margin-bottom:6px; }
+  .qf-field{ display:flex; flex-direction:column; gap:5px; }
+  .qf-field label{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+  .qf-field input, .qf-field select{ padding:10px 8px; font-size:14px; }
+  .qf-note-field{ margin-top:12px; }
+  .stepper{ display:flex; align-items:stretch; gap:0; }
+  .stepper input{ text-align:center; border-radius:0; flex:1; min-width:0; }
+  .stepper button{ padding:0 14px; font-size:16px; border-radius:3px; }
+  .stepper button:first-child{ border-radius:3px 0 0 3px; border-right:none; }
+  .stepper button:last-child{ border-radius:0 3px 3px 0; border-left:none; }
+  .qf-advanced-toggle{
+    width:100%; background:none; border:none; color:var(--gold); text-align:left;
+    padding:8px 0; font-size:12px; text-transform:uppercase; letter-spacing:.3px;
+  }
+  .qf-advanced-toggle:hover{ background:none; color:var(--cream); }
+  .qf-advanced{ display:none; padding-top:6px; border-top:1px solid var(--line); margin-top:4px; }
+  .qf-advanced.open{ display:block; }
+  .qf-save{
+    width:100%; background:var(--gold); color:#111; font-weight:bold; font-size:15px;
+    padding:14px; border:none; border-radius:6px; margin-top:16px;
+  }
+
+  /* ===== Snackbar (undo eliminazione) ===== */
+  .snackbar{
+    position:fixed; left:16px; right:16px; bottom:78px; z-index:200;
+    background:#1d1d1d; color:var(--cream); border:1px solid var(--gold-dim); border-radius:8px;
+    padding:12px 14px; font-family:Arial, sans-serif; font-size:13px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    transform:translateY(16px); opacity:0; pointer-events:none; transition:all .2s;
+    max-width:480px; margin:0 auto;
+  }
+  .snackbar.show{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .snackbar button{ background:none; border:none; color:var(--gold); font-weight:bold; padding:2px 4px; font-size:13px; }
+
+  @media print{ .tabbar{ display:none; } .panel{ display:block !important; } body{ padding-bottom:0; } }
 </style>
 </head>
 <body class="view-card">
@@ -252,8 +316,106 @@
 <h1>Espresso Log</h1>
 <div class="subtitle">Ninja Luxe Café ES600EU · Barista Assist · protocollo sperimentale — bilancia MHW-3BOMBER Cube 2.0 Mini</div>
 
+<!-- ===== PANEL: NUOVO SHOT ===== -->
+<div class="panel" id="panel-new">
+  <div class="qf-card">
+    <div class="timer-box">
+      <div class="timer-display" id="timerDisplay">0.0</div>
+      <div class="timer-btns">
+        <button type="button" id="timerStartBtn" class="qf-timer-btn" onclick="timerToggle()">Avvia</button>
+        <button type="button" class="qf-timer-reset" onclick="timerReset()">Reset</button>
+      </div>
+    </div>
+
+    <div class="qf-grid">
+      <div class="qf-field">
+        <label>Grind</label>
+        <div class="stepper">
+          <button type="button" onclick="stepVal('qfGrind',-1)">−</button>
+          <input type="number" id="qfGrind" step="1" placeholder="10">
+          <button type="button" onclick="stepVal('qfGrind',1)">+</button>
+        </div>
+      </div>
+      <div class="qf-field">
+        <label>Dose (g)</label>
+        <div class="stepper">
+          <button type="button" onclick="stepVal('qfDose',-0.5)">−</button>
+          <input type="number" id="qfDose" step="0.1" placeholder="18.0">
+          <button type="button" onclick="stepVal('qfDose',0.5)">+</button>
+        </div>
+      </div>
+      <div class="qf-field">
+        <label>Stop manuale</label>
+        <select id="qfManualStop" onchange="onQfManualStopChange()">
+          <option value="no">No</option>
+          <option value="si">Sì</option>
+        </select>
+      </div>
+      <div class="qf-field" id="qfStopAtWrap" style="display:none;">
+        <label>Stop a (s)</label>
+        <input type="number" id="qfStopAt" step="1" placeholder="s">
+      </div>
+      <div class="qf-field">
+        <label>Tempo (s)</label>
+        <input type="number" id="qfTime" step="1" placeholder="s (o usa il timer)">
+      </div>
+      <div class="qf-field">
+        <label>Resa (g)</label>
+        <input type="number" id="qfYield" step="0.1" placeholder="36.0">
+      </div>
+    </div>
+
+    <button type="button" class="qf-advanced-toggle" id="qfAdvToggle" onclick="toggleAdvanced()">Altri campi ▾</button>
+
+    <div class="qf-advanced" id="qfAdvanced">
+      <div class="qf-grid">
+        <div class="qf-field"><label>Sacchetto</label><input type="date" id="qfBag"></div>
+        <div class="qf-field"><label>Hopper fill</label><input type="date" id="qfHopper"></div>
+        <div class="qf-field"><label>Grind cons.</label><input type="number" step="1" id="qfGrindCons" placeholder="es. 9"></div>
+        <div class="qf-field"><label>Grind post</label><input type="number" step="1" id="qfGrindPost" placeholder="es. 9"></div>
+        <div class="qf-field"><label>Tamp (s)</label><input type="number" step="0.1" id="qfTamp" placeholder="es. 2"></div>
+        <div class="qf-field">
+          <label>Vel. flow</label>
+          <select id="qfFlowSpeed">
+            <option value="">—</option>
+            <option value="nullo">Nullo</option>
+            <option value="lento">Troppo lento</option>
+            <option value="ok">Ok</option>
+            <option value="veloce">Veloce</option>
+            <option value="ottimo">Ottimo</option>
+          </select>
+        </div>
+        <div class="qf-field">
+          <label>Tostatura</label>
+          <select id="qfRoast">
+            <option value="chiara">Chiara</option>
+            <option value="media" selected>Media</option>
+            <option value="scura">Scura</option>
+          </select>
+        </div>
+        <div class="qf-field">
+          <label>Texture</label>
+          <select id="qfTexture">
+            <option value="">—</option>
+            <option value="acquosa">Acquosa</option>
+            <option value="densa">Densa</option>
+          </select>
+        </div>
+      </div>
+      <div class="qf-field qf-note-field">
+        <label>Note</label>
+        <input type="text" id="qfNote" placeholder="osservazioni...">
+      </div>
+    </div>
+
+    <button type="button" class="qf-save" onclick="saveQuickShot()">Salva shot</button>
+  </div>
+</div>
+
+<!-- ===== PANEL: STORICO ===== -->
+<div class="panel" id="panel-history">
+
 <div class="toolbar">
-  <button onclick="addRow()">+ Nuovo shot</button>
   <button onclick="exportCSV()">Esporta CSV</button>
   <button onclick="openJsonPanel('export')">Esporta JSON</button>
   <button onclick="openJsonPanel('import')">Importa JSON</button>
@@ -330,6 +492,11 @@
   I dati sono salvati in locale su questo dispositivo/browser (localStorage) e restano disponibili tra una sessione e l'altra. Usa <b>Esporta/Importa JSON</b> per fare backup o migrare il log su un altro dispositivo (copia il testo del backup e incollalo nell'altra istanza).
 </div>
 
+</div>
+<!-- ===== /PANEL: STORICO ===== -->
+
+<!-- ===== PANEL: ANALISI ===== -->
+<div class="panel" id="panel-analysis">
 <div class="dash">
   <h2>Analisi grafica</h2>
   <div class="dash-sub">Tutti i grafici considerano solo gli shot con <b>Stop manuale = No</b> (gli unici diagnostici sul comportamento autonomo della macchina). Scegli quali grafici mostrare, riordinali con la maniglia ⠿ e salva la disposizione come template.</div>
@@ -356,6 +523,16 @@
 </div>
 
 <div class="chart-tip" id="chartTip"></div>
+</div>
+<!-- ===== /PANEL: ANALISI ===== -->
+
+<div class="snackbar" id="snackbar"></div>
+
+<div class="tabbar">
+  <button type="button" id="tabBtnNew" onclick="setTab('new')">Nuovo</button>
+  <button type="button" id="tabBtnHistory" onclick="setTab('history')">Storico</button>
+  <button type="button" id="tabBtnAnalysis" onclick="setTab('analysis')">Analisi</button>
+</div>
 
 <script>
 const STORAGE_KEY = 'espresso_log_es600eu_v2';
@@ -384,6 +561,155 @@ async function loadView(){
   applyView(v);
 }
 
+// ===== Tab (Nuovo / Storico / Analisi) =====
+const TAB_KEY = 'espresso_log_tab_v1';
+function applyTab(t){
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + t);
+  if(panel) panel.classList.add('active');
+  document.getElementById('tabBtnNew').classList.toggle('active', t === 'new');
+  document.getElementById('tabBtnHistory').classList.toggle('active', t === 'history');
+  document.getElementById('tabBtnAnalysis').classList.toggle('active', t === 'analysis');
+}
+function setTab(t){
+  applyTab(t);
+  storageSet(TAB_KEY, t);
+}
+async function loadTab(){
+  let t = 'new';
+  try{
+    const val = await storageGet(TAB_KEY);
+    if(val) t = val;
+  }catch(e){}
+  applyTab(t);
+}
+
+// ===== Snackbar (conferma/undo) =====
+let snackTimer = null;
+let _snackUndoFn = null;
+function showSnack(msg, undoFn){
+  const el = document.getElementById('snackbar');
+  _snackUndoFn = undoFn || null;
+  el.innerHTML = '<span>' + msg + '</span>' + (undoFn ? '<button type="button" onclick="snackUndoClick()">Annulla</button>' : '');
+  el.classList.add('show');
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(() => { el.classList.remove('show'); _snackUndoFn = null; }, 4000);
+}
+function snackUndoClick(){
+  if(_snackUndoFn) _snackUndoFn();
+  document.getElementById('snackbar').classList.remove('show');
+  clearTimeout(snackTimer);
+  _snackUndoFn = null;
+}
+
+// ===== Timer (Nuovo shot) =====
+let timerRunning = false, timerInterval = null, timerStartTs = 0, timerElapsed = 0;
+function timerToggle(){
+  const btn = document.getElementById('timerStartBtn');
+  if(!timerRunning){
+    timerRunning = true;
+    timerStartTs = Date.now() - timerElapsed * 1000;
+    timerInterval = setInterval(updateTimerDisplay, 100);
+    btn.textContent = 'Ferma';
+  } else {
+    timerRunning = false;
+    clearInterval(timerInterval);
+    btn.textContent = 'Avvia';
+    const secs = Math.round(timerElapsed);
+    document.getElementById('qfTime').value = secs;
+    if(document.getElementById('qfManualStop').value === 'si'){
+      document.getElementById('qfStopAt').value = secs;
+    }
+    if(navigator.vibrate) navigator.vibrate(15);
+  }
+}
+function updateTimerDisplay(){
+  timerElapsed = (Date.now() - timerStartTs) / 1000;
+  document.getElementById('timerDisplay').textContent = timerElapsed.toFixed(1);
+}
+function timerReset(){
+  timerRunning = false;
+  clearInterval(timerInterval);
+  timerElapsed = 0;
+  timerStartTs = 0;
+  document.getElementById('timerDisplay').textContent = '0.0';
+  document.getElementById('timerStartBtn').textContent = 'Avvia';
+}
+
+// ===== Form rapido "Nuovo shot" =====
+function stepVal(id, delta){
+  const el = document.getElementById(id);
+  let v = parseFloat(el.value);
+  if(isNaN(v)) v = 0;
+  v = Math.round((v + delta) * 10) / 10;
+  if(v < 0) v = 0;
+  el.value = v;
+}
+function onQfManualStopChange(){
+  const v = document.getElementById('qfManualStop').value;
+  document.getElementById('qfStopAtWrap').style.display = v === 'si' ? 'flex' : 'none';
+}
+function toggleAdvanced(){
+  const adv = document.getElementById('qfAdvanced');
+  const open = adv.classList.toggle('open');
+  document.getElementById('qfAdvToggle').textContent = open ? 'Altri campi ▴' : 'Altri campi ▾';
+}
+function qfPrefill(){
+  const last = rows.length ? rows[rows.length - 1] : null;
+  document.getElementById('qfGrind').value = last ? (last.grind || '') : '';
+  document.getElementById('qfDose').value = last ? (last.dose || '') : '';
+  document.getElementById('qfBag').value = last ? (last.bagOpenDate || '') : '';
+  document.getElementById('qfHopper').value = last ? (last.hopperFillDate || '') : '';
+  document.getElementById('qfRoast').value = last ? (last.roast || 'media') : 'media';
+}
+function resetQuickFormAfterSave(){
+  timerReset();
+  ['qfYield','qfStopAt','qfTime','qfNote','qfTamp','qfGrindCons','qfGrindPost'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('qfFlowSpeed').value = '';
+  document.getElementById('qfTexture').value = '';
+  document.getElementById('qfManualStop').value = 'no';
+  onQfManualStopChange();
+  qfPrefill();
+}
+function saveQuickShot(){
+  const grind = document.getElementById('qfGrind').value;
+  const dose = document.getElementById('qfDose').value;
+  const yieldOut = document.getElementById('qfYield').value;
+  const totalTime = document.getElementById('qfTime').value;
+
+  if(!grind && !dose && !yieldOut && !totalTime){
+    alert('Inserisci almeno grind, dose, tempo o resa.');
+    return;
+  }
+
+  rows.push({
+    id: Date.now() + Math.random(),
+    date: todayStr(),
+    bagOpenDate: document.getElementById('qfBag').value || '',
+    hopperFillDate: document.getElementById('qfHopper').value || '',
+    grind, recommendedGrind: document.getElementById('qfGrindCons').value,
+    recommendedGrindPost: document.getElementById('qfGrindPost').value,
+    dose,
+    manualStop: document.getElementById('qfManualStop').value,
+    stopAt: document.getElementById('qfStopAt').value,
+    totalTime,
+    yieldOut,
+    tampSec: document.getElementById('qfTamp').value,
+    flowSpeed: document.getElementById('qfFlowSpeed').value,
+    roast: document.getElementById('qfRoast').value || 'media',
+    note: document.getElementById('qfNote').value,
+    texture: document.getElementById('qfTexture').value
+  });
+  save();
+  render();
+
+  if(navigator.vibrate) navigator.vibrate([10,40,10]);
+  showSnack('Shot salvato ✓');
+  resetQuickFormAfterSave();
+}
+
 async function load(){
   try{
     const val = await storageGet(STORAGE_KEY);
@@ -399,7 +725,6 @@ async function load(){
     }catch(e){ rows = []; }
   }
 
-  if(rows.length === 0){ addRow(false); }
   migrateLegacyDates();
   render();
 }
@@ -463,29 +788,15 @@ function migrateLegacyDates(){
   if(changed) save();
 }
 
-function addRow(doSave = true){
-  const lastBagDate = rows.length ? rows[rows.length - 1].bagOpenDate : '';
-  const lastRoast = rows.length ? (rows[rows.length - 1].roast || 'media') : 'media';
-  const lastHopper = rows.length ? (rows[rows.length - 1].hopperFillDate || '') : '';
-  rows.push({
-    id: Date.now() + Math.random(),
-    date: todayStr(),
-    bagOpenDate: lastBagDate || '',
-    hopperFillDate: lastHopper,
-    grind: '', recommendedGrind: '', recommendedGrindPost: '', dose: '', manualStop: 'no', stopAt: '',
-    totalTime: '', yieldOut: '', tampSec: '', flowSpeed: '', roast: lastRoast, note: '', texture: ''
-  });
-  if(doSave) save();
-  render();
-}
-
 function updateRow(id, field, value){
   const r = rows.find(r => r.id === id);
   if(r){ r[field] = value; save(); render(); }
 }
 
 const openRows = new Set();
+let suppressToggle = false;
 function toggleRow(el){
+  if(suppressToggle){ suppressToggle = false; return; }
   const tr = el.closest('tr');
   const id = tr.getAttribute('data-rowid');
   if(tr.classList.toggle('open')){ openRows.add(id); }
@@ -493,16 +804,66 @@ function toggleRow(el){
 }
 
 function deleteRow(id){
+  const idx = rows.findIndex(r => r.id === id);
+  if(idx === -1) return;
+  const removed = rows[idx];
   rows = rows.filter(r => r.id !== id);
   save();
   render();
+  showSnack('Shot eliminato', () => {
+    rows.splice(Math.min(idx, rows.length), 0, removed);
+    save(); render();
+  });
+}
+
+// ===== Swipe-to-delete (mobile) =====
+function attachSwipe(tr, rowId){
+  let startX = 0, dx = 0, dragging = false, moved = false;
+  const threshold = 90;
+
+  tr.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    dragging = true; moved = false; dx = 0;
+    tr.style.transition = 'none';
+  }, {passive:true});
+
+  tr.addEventListener('touchmove', (e) => {
+    if(!dragging) return;
+    dx = e.touches[0].clientX - startX;
+    if(dx > 0) dx = 0;
+    if(Math.abs(dx) > 8) moved = true;
+    tr.style.transform = `translateX(${dx}px)`;
+  }, {passive:true});
+
+  tr.addEventListener('touchend', () => {
+    if(!dragging) return;
+    dragging = false;
+    tr.style.transition = 'transform .2s';
+    if(dx < -threshold){
+      suppressToggle = true;
+      tr.style.transform = 'translateX(-100%)';
+      const idx = rows.findIndex(r => r.id === rowId);
+      const removed = rows[idx];
+      rows = rows.filter(r => r.id !== rowId);
+      save();
+      setTimeout(() => render(), 180);
+      showSnack('Shot eliminato', () => {
+        rows.splice(Math.min(idx, rows.length), 0, removed);
+        save(); render();
+      });
+    } else {
+      tr.style.transform = 'translateX(0)';
+      if(moved) suppressToggle = true;
+    }
+    setTimeout(() => { suppressToggle = false; }, 300);
+  });
 }
 
 function clearAll(){
   if(confirm('Svuotare completamente il log? Operazione non reversibile.')){
     rows = [];
     save();
-    addRow();
+    render();
   }
 }
 
@@ -615,6 +976,7 @@ function render(){
       <td data-label=""><button class="del-btn" onclick="deleteRow(${r.id})" title="Elimina riga">✕<span class="del-label"> Elimina riga</span></button></td>
     `;
     body.appendChild(tr);
+    attachSwipe(tr, r.id);
   });
 }
 
@@ -1094,7 +1456,10 @@ function closeNoteModal(save){
 async function init(){
   await load();
   await loadView();
+  await loadTab();
   await initDashboard();
+  qfPrefill();
+  onQfManualStopChange();
 
   // Re-render quando l'artefatto torna visibile: todayStr() è sempre dinamico,
   // quindi i nuovi shot prenderanno la data corretta anche dopo mezzanotte
