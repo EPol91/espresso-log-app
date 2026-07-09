@@ -1,6 +1,6 @@
 {
-  "name": "Espresso Log — Barista Assist ES600EU",
-  "short_name": "Espresso Log",
+  "name": "Polspresso — Espresso Log ES600EU",
+  "short_name": "Polspresso",
   "description": "Log shot espresso Ninja Luxe Café ES600EU con analisi grafica",
   "start_url": "./index.html",
   "scope": "./",
