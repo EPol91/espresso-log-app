@@ -1,4 +1,4 @@
-const CACHE_NAME = 'espresso-log-v2';
+const CACHE_NAME = 'espresso-log-v3';
 const ASSETS = [
   './',
   './index.html',
