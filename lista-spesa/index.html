@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Lista Spesa EP</title>
+<link href="../fonts/fonts.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e;
+  --surface: #1a1a1a;
+  --surface2: #222222;
+  --border: rgba(255,255,255,0.08);
+  --gold: #C9A84C;
+  --gold-dim: rgba(201,168,76,0.12);
+  --gold-border: rgba(201,168,76,0.3);
+  --text: #f0ede8;
+  --text-dim: #888;
+  --red: #c0392b;
+  --green: #27ae60;
+  --blue: #2980b9;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── HOME BUTTON (POL-IN-ONE) ── */
+.pio-home{width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.pio-home:active{transform:scale(0.92);}
+.pio-home svg{width:20px;height:20px;}
+
+/* ── HEADER ── */
+header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 18px 16px 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.title-block h1 { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 2px; line-height: 1; }
+.title-block h1 span { color: var(--gold); }
+.subtitle { font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+.header-actions { display: flex; gap: 8px; }
+.btn-icon {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-dim); cursor: pointer; font-size: 15px;
+  height: 34px; width: 34px; display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.btn-icon:active { transform: scale(.9); }
+.btn-icon.active { color: var(--gold); border-color: var(--gold-border); background: var(--gold-dim); }
+
+/* progress */
+.progress-wrap { display: flex; align-items: center; gap: 10px; }
+.progress-bar-bg { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .4s ease; }
+.progress-label { font-size: 11px; color: var(--text-dim); white-space: nowrap; min-width: 44px; text-align: right; }
+
+/* ── BOTTOM TAB BAR ── */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: #111; border-top: 1px solid var(--border);
+  display: flex; height: 64px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; background: transparent; border: none; cursor: pointer;
+  color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 10px;
+  letter-spacing: .5px; text-transform: uppercase; transition: color .15s; position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn .tab-icon { font-size: 22px; line-height: 1; }
+.tab-btn.active { color: var(--gold); }
+.tab-btn.active::after {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 2px; background: var(--gold); border-radius: 0 0 3px 3px;
+}
+.tab-badge {
+  position: absolute; top: 6px; right: calc(50% - 18px);
+  background: var(--gold); color: #111; font-size: 9px; font-weight: 700;
+  width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  display: none;
+}
+.tab-badge.show { display: flex; }
+
+/* ── MAIN ── */
+main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── SECTION ── */
+.section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.section-header {
+  display: flex; align-items: center; padding: 11px 12px 11px 14px; gap: 8px;
+  border-bottom: 1px solid var(--border); background: var(--surface2);
+}
+.section-icon { font-size: 17px; width: 26px; text-align: center; flex-shrink: 0; cursor: pointer; }
+.section-title-wrap { flex: 1; min-width: 0; }
+.section-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  color: var(--gold); cursor: pointer; display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.section-title-input {
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  color: var(--gold); background: transparent; border: none;
+  border-bottom: 1px solid var(--gold); outline: none; width: 100%; padding: 0;
+}
+.section-count { font-size: 10px; color: var(--text-dim); }
+.section-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.btn-sm {
+  background: transparent; border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-dim); cursor: pointer; font-size: 12px;
+  height: 26px; min-width: 26px; padding: 0 5px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.btn-sm:active { transform: scale(.88); }
+
+/* ── ITEMS ── */
+.items-list { padding: 2px 0; }
+.item { border-bottom: 1px solid var(--border); transition: background .15s; }
+.item:last-child { border-bottom: none; }
+.item.done .item-label { text-decoration: line-through; color: var(--text-dim); }
+.item.selected-item { background: rgba(201,168,76,0.06); }
+
+.item-row1 { display: flex; align-items: center; padding: 10px 10px 3px 12px; gap: 9px; }
+.item-check {
+  width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent; transition: all .15s;
+}
+.item.done .item-check { background: var(--gold); border-color: var(--gold); color: #111; }
+.item-label { flex: 1; font-size: 14px; cursor: pointer; line-height: 1.3; word-break: break-word; }
+.item-qty {
+  font-size: 11px; color: var(--gold); background: var(--gold-dim);
+  border: 1px solid var(--gold-border); border-radius: 4px; padding: 2px 5px;
+  white-space: nowrap; flex-shrink: 0; cursor: pointer;
+}
+.item-qty.empty { opacity: .35; font-size: 10px; }
+.item-label-input { background: transparent; border: none; border-bottom: 1px solid var(--gold); outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; flex: 1; padding: 0; min-width: 0; }
+.item-qty-input { background: transparent; border: 1px solid var(--gold-border); border-radius: 4px; outline: none; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 2px 5px; width: 60px; text-align: center; }
+
+.item-row2 { display: flex; align-items: center; padding: 0 8px 6px 38px; gap: 2px; }
+.item-note { flex: 1; font-size: 11px; color: var(--text-dim); font-style: italic; cursor: pointer; min-height: 14px; }
+.item-note.empty::before { content: '+ nota'; color: #444; font-style: normal; }
+.item-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 11px; font-style: italic; padding: 0; min-width: 0; }
+
+/* item action buttons */
+.btn-act {
+  background: transparent; border: none; cursor: pointer; font-size: 15px;
+  min-width: 36px; min-height: 36px; padding: 4px 6px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+  color: #555; line-height: 1; border-radius: 6px;
+}
+.btn-act:active { transform: scale(.82); background: rgba(255,255,255,0.05); }
+.btn-act.star { color: #444; font-size: 16px; }
+.btn-act.star.on { color: #C9A84C; background: rgba(201,168,76,0.18); border-radius: 6px; text-shadow: 0 0 8px rgba(201,168,76,0.6); }
+.btn-act.cart { color: #555; }
+.btn-act.cart.on { color: var(--gold); background: var(--gold-dim); }
+.btn-act.del:active { color: var(--red); }
+.btn-act.move { font-size: 12px; color: #3a3a3a; min-width: 28px; }
+
+/* add item */
+.add-item-row { display: flex; align-items: center; padding: 9px 10px; gap: 7px; border-top: 1px solid var(--border); }
+.add-item-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 3px 0; }
+.add-item-input::placeholder { color: #3a3a3a; }
+.add-qty-input { background: transparent; border: 1px solid var(--border); border-radius: 5px; outline: none; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 4px 6px; width: 56px; text-align: center; }
+.add-qty-input::placeholder { color: #3a3a3a; font-size: 10px; }
+.btn-add { background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 7px; color: var(--gold); cursor: pointer; font-size: 20px; height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+.btn-add:active { background: var(--gold); color: #111; transform: scale(.9); }
+
+/* ── ADD SECTION / FOOTER ── */
+.add-section-wrap { padding: 0 16px 12px; }
+.btn-add-section { background: transparent; border: 1px dashed rgba(201,168,76,0.25); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px; width: 100%; transition: all .2s; }
+.btn-add-section:active { border-color: var(--gold); color: var(--gold); }
+.footer-actions { display: flex; justify-content: center; gap: 10px; padding: 4px 16px 12px; flex-wrap: wrap; }
+.btn-secondary { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 12px; }
+.btn-secondary:active { border-color: var(--text-dim); color: var(--text); }
+.btn-danger { background: transparent; border: 1px solid rgba(192,57,43,0.3); border-radius: 8px; color: rgba(192,57,43,0.7); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 12px; }
+.btn-danger:active { border-color: var(--red); color: var(--red); }
+
+/* ── SPESA MODE HEADER ── */
+.spesa-header-bar {
+  display: none;
+  background: var(--gold);
+  color: #111;
+  padding: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+}
+.spesa-header-bar.show { display: flex; }
+.btn-fine-spesa {
+  background: #111; color: var(--gold); border: 1px solid #111;
+  border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 12px;
+  font-weight: 600; padding: 6px 14px; cursor: pointer; white-space: nowrap;
+}
+.btn-fine-spesa:active { background: #000; }
+
+/* ── PREFERITI EMPTY / SPESA EMPTY ── */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+.empty-state .emoji { font-size: 36px; margin-bottom: 10px; }
+.empty-state strong { color: var(--text); font-weight: 600; }
+
+/* ── PREFERITI HEADER ACTIONS ── */
+.pref-actions { display: flex; align-items: center; gap: 8px; padding: 0 16px 14px; }
+.btn-sel-all { background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 7px; color: var(--gold); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; flex: 1; text-align: center; }
+.btn-sel-all:active { background: var(--gold); color: #111; }
+
+/* ── SPESA ITEM (clean) ── */
+.spesa-item { border-bottom: 1px solid var(--border); }
+.spesa-item:last-child { border-bottom: none; }
+.spesa-item.done .spesa-label { text-decoration: line-through; color: var(--text-dim); opacity: .5; }
+.spesa-item-row { display: flex; align-items: center; padding: 15px 14px; gap: 14px; }
+.spesa-check {
+  width: 26px; height: 26px; border: 2px solid var(--border); border-radius: 7px;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: transparent; transition: all .15s;
+}
+.spesa-item.done .spesa-check { background: var(--gold); border-color: var(--gold); color: #111; }
+.spesa-label { flex: 1; font-size: 15px; line-height: 1.3; }
+.spesa-qty { font-size: 12px; color: var(--gold); font-weight: 500; }
+
+/* ── SECTION SPESA (no header edit) ── */
+.section.spesa-sec .section-header { cursor: default; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface2); border: 1px solid var(--gold-border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 9px 18px; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top" style="gap:10px;">
+    <a href="../index.html" class="pio-home" aria-label="Torna alla home POL-IN-ONE">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    </a>
+    <div class="title-block" style="flex:1;">
+      <h1 id="mainTitle">LISTA <span style="color:var(--gold)">SPESA</span></h1>
+      <div class="subtitle" id="headerSub">Tocca per spuntare · Tieni per modificare</div>
+    </div>
+    <div class="header-actions" id="headerActions">
+      <button class="btn-icon" id="btnClearDone" title="Rimuovi spuntati" onclick="clearDone()">🧹</button>
+      <button class="btn-icon" id="btnExport" onclick="exportList()">📋</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0</div>
+  </div>
+  <!-- Spesa mode bar -->
+  <div class="spesa-header-bar" id="spesaBar">
+    <span id="spesaBarLabel">MODALITÀ SPESA</span>
+    <button class="btn-fine-spesa" onclick="endSpesa()">FINE SPESA</button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<div id="footerLista">
+  <div class="add-section-wrap"><button class="btn-add-section" onclick="addSection()">+ Nuova sezione</button></div>
+  <div class="footer-actions">
+    <button class="btn-secondary" onclick="exportList()">📋 Copia lista</button>
+    <button class="btn-danger" onclick="resetAll()">🗑 Reset</button>
+  </div>
+  <div style="height:120px;flex-shrink:0;"></div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabLista" onclick="setView('lista')">
+    <span class="tab-icon">📋</span>Lista
+  </button>
+  <button class="tab-btn" id="tabPreferiti" onclick="setView('preferiti')">
+    <span class="tab-icon">⭐</span>Preferiti
+    <span class="tab-badge" id="badgePref"></span>
+  </button>
+  <button class="tab-btn" id="tabSpesa" onclick="setView('spesa')">
+    <span class="tab-icon">🛒</span>Spesa
+    <span class="tab-badge" id="badgeSel"></span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DEFAULT DATA ──────────────────────────────────────────────────
+const DEFAULT_SECTIONS = [
+  {
+    id: 'frutta-verdura', icon: '🥦', title: 'Frutta & Verdura',
+    items: [
+      { id: 'i1',  label: 'Zucchine',                      qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i2',  label: 'Lattuga',                       qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i3',  label: 'Fagiolini',                     qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i4',  label: 'Patate Bollite',                qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i5',  label: 'Patate Dolci',                  qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i6',  label: 'Spinaci',                       qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i7',  label: 'Banane',                        qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i8',  label: 'Mirtilli',                      qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i9',  label: 'Mix frutti di bosco surgelati', qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i10', label: 'Mele',                          qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+  {
+    id: 'carne-pesce', icon: '🥩', title: 'Carne & Pesce',
+    items: [
+      { id: 'i20', label: 'Petto di pollo',  qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i21', label: 'Manzo',           qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i22', label: 'Merluzzo',        qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i23', label: 'Salmone',         qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i24', label: 'Uova intere',     qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i25', label: "Albume d'Uovo",   qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+  {
+    id: 'latticini', icon: '🧀', title: 'Latticini',
+    items: [
+      { id: 'i30', label: 'Yogurt greco 0%', qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i31', label: 'Ricotta magra',   qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+  {
+    id: 'secchi-cereali', icon: '🌾', title: 'Secchi & Cereali',
+    items: [
+      { id: 'i40', label: 'Riso Basmati',  qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i41', label: 'Avena fiocchi', qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i42', label: 'Pasta di Riso', qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+  {
+    id: 'integratori', icon: '💊', title: 'Integratori & Suppl.',
+    items: [
+      { id: 'i50', label: 'Proteine Isopure', qty: '', note: '',              done: false, hidden: false, fav: false, sel: false },
+      { id: 'i51', label: 'Creatina',         qty: '', note: '',              done: false, hidden: false, fav: false, sel: false },
+      { id: 'i52', label: 'EAA',              qty: '', note: '',              done: false, hidden: false, fav: false, sel: false },
+      { id: 'i53', label: 'Glutammina',       qty: '', note: 'Kyowa Quality', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i54', label: 'Ciclodestrine',    qty: '', note: 'intra-workout', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i55', label: 'Citrullina',       qty: '', note: 'intra-workout', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i56', label: 'Omega-3',          qty: '', note: '4g EPA+DHA/day',done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+  {
+    id: 'condimenti', icon: '🫙', title: 'Condimenti & Varie',
+    items: [
+      { id: 'i60', label: "Olio Extra Vergine d'Oliva", qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i61', label: 'Burro di Mandorle',          qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i62', label: 'Miele',                      qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+      { id: 'i63', label: 'Sale fino',                  qty: '', note: '', done: false, hidden: false, fav: false, sel: false },
+    ]
+  },
+];
+
+// ─── STATE ────────────────────────────────────────────────────────
+const STORAGE_KEY = 'lista_spesa_v3';
+let state = { sections: [] };
+let currentView = 'lista'; // 'lista' | 'preferiti' | 'spesa'
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      state = JSON.parse(raw);
+      // migrate: add missing fav/sel fields
+      state.sections.forEach(s => s.items.forEach(it => {
+        if (it.fav === undefined) it.fav = false;
+        if (it.sel === undefined) it.sel = false;
+      }));
+    } else {
+      state = { sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)) };
+    }
+  } catch(e) {
+    state = { sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)) };
+  }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function uid() { return 'x' + Math.random().toString(36).slice(2, 9); }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function getSec(id) { return state.sections.find(s => s.id === id); }
+function getItem(secId, itemId) { const s = getSec(secId); return s && s.items.find(i => i.id === itemId); }
+function allItems() { return state.sections.flatMap(s => s.items); }
+function selCount() { return allItems().filter(i => i.sel).length; }
+function favCount() { return allItems().filter(i => i.fav).length; }
+
+// ─── VIEW SWITCHING ───────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  ['lista','preferiti','spesa'].forEach(tab => {
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))
+      .classList.toggle('active', tab === v);
+  });
+  render();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────
+function render() {
+  updateBadges();
+  if (currentView === 'lista')     renderLista();
+  else if (currentView === 'preferiti') renderPreferiti();
+  else if (currentView === 'spesa')     renderSpesa();
+}
+
+// ── LISTA ──
+function renderLista() {
+  updateHeader('LISTA <span style="color:var(--gold)">SPESA</span>', 'Tocca per spuntare · ⭐ preferiti · 🛒 aggiungi alla spesa');
+  document.getElementById('headerActions').style.display = 'flex';
+  document.getElementById('spesaBar').classList.remove('show');
+  document.getElementById('footerLista').style.display = '';
+
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  state.sections.forEach(sec => {
+    const visible = sec.items.filter(i => !i.hidden);
+    const done = visible.filter(i => i.done).length;
+    const secEl = document.createElement('div');
+    secEl.className = 'section'; secEl.dataset.secId = sec.id;
+
+    secEl.innerHTML = `
+      <div class="section-header">
+        <div class="section-icon" onclick="changeIcon('${sec.id}')">${sec.icon}</div>
+        <div class="section-title-wrap">
+          <span class="section-title" id="stitle-${sec.id}" onclick="editSectionTitle('${sec.id}')">${escHtml(sec.title)}</span>
+          <div class="section-count">${done}/${visible.length}</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn-sm" onclick="moveSectionUp('${sec.id}')">▲</button>
+          <button class="btn-sm" onclick="moveSectionDown('${sec.id}')">▼</button>
+          <button class="btn-sm" onclick="deleteSection('${sec.id}')">✕</button>
+        </div>
+      </div>
+      <div class="items-list" id="items-${sec.id}"></div>
+      <div class="add-item-row">
+        <input class="add-item-input" id="addInput-${sec.id}" type="text" placeholder="Aggiungi prodotto…"
+          onkeydown="if(event.key==='Enter'){addItem('${sec.id}')}" />
+        <input class="add-qty-input" id="addQty-${sec.id}" type="text" placeholder="qtà"
+          onkeydown="if(event.key==='Enter'){addItem('${sec.id}')}" />
+        <button class="btn-add" onclick="addItem('${sec.id}')">+</button>
+      </div>`;
+
+    const itemsEl = secEl.querySelector(`#items-${sec.id}`);
+    sec.items.forEach(item => {
+      if (item.hidden) return;
+      const el = document.createElement('div');
+      el.className = 'item' + (item.done ? ' done' : '') + (item.sel ? ' selected-item' : '');
+      el.dataset.itemId = item.id;
+      el.innerHTML = `
+        <div class="item-row1">
+          <div class="item-check" onclick="toggleDone('${sec.id}','${item.id}')">✓</div>
+          <span class="item-label" onclick="editItemLabel('${sec.id}','${item.id}')">${escHtml(item.label)}</span>
+          <span class="item-qty${item.qty ? '' : ' empty'}" onclick="editItemQty('${sec.id}','${item.id}')">${item.qty ? escHtml(item.qty) : '+ qtà'}</span>
+        </div>
+        <div class="item-row2">
+          <span class="item-note${item.note ? '' : ' empty'}" onclick="editItemNote('${sec.id}','${item.id}')">${item.note ? escHtml(item.note) : ''}</span>
+          <button class="btn-act star${item.fav ? ' on' : ''}" onclick="toggleFav('${sec.id}','${item.id}')" title="Preferito">⭐</button>
+          <button class="btn-act cart${item.sel ? ' on' : ''}" onclick="toggleSel('${sec.id}','${item.id}')" title="Aggiungi alla spesa">🛒</button>
+          <button class="btn-act move" onclick="moveItemUp('${sec.id}','${item.id}')">▲</button>
+          <button class="btn-act move" onclick="moveItemDown('${sec.id}','${item.id}')">▼</button>
+          <button class="btn-act del" onclick="deleteItem('${sec.id}','${item.id}')">✕</button>
+        </div>`;
+      itemsEl.appendChild(el);
+    });
+
+    main.appendChild(secEl);
+  });
+
+  if (state.sections.length === 0) {
+    main.innerHTML = `<div class="empty-state"><div class="emoji">🛒</div>Nessuna sezione.<br>Aggiungine una!</div>`;
+  }
+  updateProgress('lista');
+}
+
+// ── PREFERITI ──
+function renderPreferiti() {
+  updateHeader('⭐ <span style="color:var(--gold)">PREFERITI</span>', 'Gli articoli che compri più spesso');
+  document.getElementById('headerActions').style.display = 'none';
+  document.getElementById('spesaBar').classList.remove('show');
+  document.getElementById('footerLista').style.display = 'none';
+
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const favItems = allItems().filter(i => i.fav);
+  if (favItems.length === 0) {
+    main.innerHTML = `<div class="empty-state"><div class="emoji">⭐</div><strong>Nessun preferito ancora.</strong><br><br>Dalla scheda Lista, tocca ⭐ accanto a un prodotto per aggiungerlo qui.</div>`;
+    updateProgress('preferiti');
+    return;
+  }
+
+  // "Seleziona tutto" bar
+  const allSel = favItems.every(i => i.sel);
+  const bar = document.createElement('div');
+  bar.className = 'pref-actions';
+  bar.innerHTML = `<button class="btn-sel-all" onclick="toggleSelAll()">${allSel ? '✕ Deseleziona tutto' : '🛒 Seleziona tutto per la spesa'}</button>`;
+  main.appendChild(bar);
+
+  // group by section
+  state.sections.forEach(sec => {
+    const favInSec = sec.items.filter(i => i.fav);
+    if (!favInSec.length) return;
+
+    const secEl = document.createElement('div');
+    secEl.className = 'section'; secEl.dataset.secId = sec.id;
+    secEl.innerHTML = `
+      <div class="section-header" style="cursor:default">
+        <div class="section-icon">${sec.icon}</div>
+        <div class="section-title-wrap">
+          <span class="section-title">${escHtml(sec.title)}</span>
+        </div>
+      </div>
+      <div class="items-list" id="pfav-${sec.id}"></div>`;
+
+    const listEl = secEl.querySelector(`#pfav-${sec.id}`);
+    favInSec.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'item' + (item.done ? ' done' : '') + (item.sel ? ' selected-item' : '');
+      el.innerHTML = `
+        <div class="item-row1">
+          <div class="item-check" onclick="toggleDone('${sec.id}','${item.id}')">✓</div>
+          <span class="item-label">${escHtml(item.label)}</span>
+          ${item.qty ? `<span class="item-qty">${escHtml(item.qty)}</span>` : ''}
+        </div>
+        <div class="item-row2">
+          <span class="item-note${item.note ? '' : ' empty'}">${item.note ? escHtml(item.note) : ''}</span>
+          <button class="btn-act star on" onclick="toggleFav('${sec.id}','${item.id}')" title="Rimuovi dai preferiti">⭐</button>
+          <button class="btn-act cart${item.sel ? ' on' : ''}" onclick="toggleSel('${sec.id}','${item.id}')" title="Aggiungi alla spesa">🛒</button>
+        </div>`;
+      listEl.appendChild(el);
+    });
+
+    main.appendChild(secEl);
+  });
+
+  updateProgress('preferiti');
+  // spacer
+  const sp1 = document.createElement('div');
+  sp1.style.cssText = 'height:120px;flex-shrink:0;';
+  main.appendChild(sp1);
+}
+
+// ── SPESA ──
+function renderSpesa() {
+  const selItems = allItems().filter(i => i.sel);
+
+  updateHeader('🛒 <span style="color:var(--gold)">SPESA DI OGGI</span>', '');
+  document.getElementById('headerActions').style.display = 'none';
+  document.getElementById('footerLista').style.display = 'none';
+
+  const bar = document.getElementById('spesaBar');
+  if (selItems.length > 0) {
+    bar.classList.add('show');
+    document.getElementById('spesaBarLabel').textContent = `${selItems.filter(i=>i.done).length}/${selItems.length} prodotti`;
+  } else {
+    bar.classList.remove('show');
+  }
+
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  if (selItems.length === 0) {
+    main.innerHTML = `<div class="empty-state"><div class="emoji">🛒</div><strong>Nessun prodotto selezionato.</strong><br><br>Dalla scheda Lista o Preferiti, tocca 🛒 accanto agli articoli da comprare oggi.</div>`;
+    updateProgress('spesa');
+    return;
+  }
+
+  state.sections.forEach(sec => {
+    const selInSec = sec.items.filter(i => i.sel);
+    if (!selInSec.length) return;
+
+    const secEl = document.createElement('div');
+    secEl.className = 'section spesa-sec';
+    secEl.innerHTML = `
+      <div class="section-header">
+        <div class="section-icon">${sec.icon}</div>
+        <div class="section-title-wrap">
+          <span class="section-title">${escHtml(sec.title)}</span>
+          <div class="section-count">${selInSec.filter(i=>i.done).length}/${selInSec.length}</div>
+        </div>
+      </div>
+      <div class="items-list" id="sspesa-${sec.id}"></div>`;
+
+    const listEl = secEl.querySelector(`#sspesa-${sec.id}`);
+    selInSec.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'spesa-item' + (item.done ? ' done' : '');
+      el.innerHTML = `
+        <div class="spesa-item-row">
+          <div class="spesa-check" onclick="toggleDoneSpesa('${sec.id}','${item.id}')">✓</div>
+          <span class="spesa-label">${escHtml(item.label)}</span>
+          ${item.qty ? `<span class="spesa-qty">${escHtml(item.qty)}</span>` : ''}
+          <button class="btn-act" style="font-size:15px;color:#3a3a3a" onclick="removeFromSpesa('${sec.id}','${item.id}')" title="Rimuovi da spesa">✕</button>
+        </div>`;
+      listEl.appendChild(el);
+    });
+
+    main.appendChild(secEl);
+  });
+
+  updateProgress('spesa');
+  const sp2 = document.createElement('div');
+  sp2.style.cssText = 'height:120px;flex-shrink:0;';
+  main.appendChild(sp2);
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────
+function updateProgress(view) {
+  let total = 0, done = 0;
+  if (view === 'lista') {
+    state.sections.forEach(s => s.items.forEach(i => { if (!i.hidden) { total++; if (i.done) done++; } }));
+  } else if (view === 'preferiti') {
+    allItems().filter(i => i.fav).forEach(i => { total++; if (i.done) done++; });
+  } else if (view === 'spesa') {
+    allItems().filter(i => i.sel).forEach(i => { total++; if (i.done) done++; });
+  }
+  document.getElementById('progressFill').style.width = total ? (done/total*100)+'%' : '0%';
+  document.getElementById('progressLabel').textContent = done + ' / ' + total;
+}
+
+function updateBadges() {
+  const sc = selCount(), fc = favCount();
+  const bs = document.getElementById('badgeSel'), bp = document.getElementById('badgePref');
+  bs.textContent = sc; bs.classList.toggle('show', sc > 0);
+  bp.textContent = fc; bp.classList.toggle('show', fc > 0);
+}
+
+function updateHeader(titleHtml, sub) {
+  document.getElementById('mainTitle').innerHTML = titleHtml;
+  document.getElementById('headerSub').textContent = sub;
+}
+
+// ─── ACTIONS ────────────────────────────────────────────────────
+function toggleDone(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  item.done = !item.done; saveState(); render();
+}
+function toggleDoneSpesa(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  item.done = !item.done; saveState(); renderSpesa();
+  document.getElementById('spesaBarLabel').textContent =
+    `${allItems().filter(i=>i.sel&&i.done).length}/${selCount()} prodotti`;
+  updateProgress('spesa');
+}
+function toggleFav(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  item.fav = !item.fav; saveState(); render();
+  showToast(item.fav ? '⭐ Aggiunto ai preferiti' : 'Rimosso dai preferiti');
+}
+function toggleSel(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  item.sel = !item.sel; saveState(); render();
+  if (item.sel) showToast('🛒 Aggiunto alla spesa');
+}
+function toggleSelAll() {
+  const favItems = allItems().filter(i => i.fav);
+  const allSel = favItems.every(i => i.sel);
+  favItems.forEach(i => i.sel = !allSel);
+  saveState(); render();
+  showToast(allSel ? 'Selezione rimossa' : '🛒 Tutti i preferiti in spesa');
+}
+function removeFromSpesa(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  item.sel = false; item.done = false;
+  saveState(); render();
+}
+function endSpesa() {
+  const done = allItems().filter(i => i.sel && i.done).length;
+  const tot = selCount();
+  const msg = tot > 0 && done === tot
+    ? `Spesa completata! (${done}/${tot})\nDeselezionare tutti gli articoli?`
+    : `Fine spesa (${done}/${tot} acquistati).\nDeselezionare tutti gli articoli?`;
+  if (confirm(msg)) {
+    allItems().forEach(i => { if (i.sel) { i.sel = false; i.done = false; } });
+    saveState();
+    showToast('✓ Spesa terminata');
+    setView('lista');
+  }
+}
+function deleteItem(secId, itemId) {
+  const sec = getSec(secId); if (!sec) return;
+  sec.items = sec.items.filter(i => i.id !== itemId); saveState(); render();
+}
+function moveItemUp(secId, itemId) {
+  const sec = getSec(secId); if (!sec) return;
+  const idx = sec.items.findIndex(i => i.id === itemId);
+  if (idx > 0) { [sec.items[idx-1], sec.items[idx]] = [sec.items[idx], sec.items[idx-1]]; saveState(); render(); }
+}
+function moveItemDown(secId, itemId) {
+  const sec = getSec(secId); if (!sec) return;
+  const idx = sec.items.findIndex(i => i.id === itemId);
+  if (idx < sec.items.length-1) { [sec.items[idx+1], sec.items[idx]] = [sec.items[idx], sec.items[idx+1]]; saveState(); render(); }
+}
+function addItem(secId) {
+  const inp = document.getElementById('addInput-'+secId);
+  const qtyInp = document.getElementById('addQty-'+secId);
+  const label = inp.value.trim(); if (!label) return;
+  const sec = getSec(secId); if (!sec) return;
+  sec.items.push({ id: uid(), label, qty: qtyInp.value.trim(), note: '', done: false, hidden: false, fav: false, sel: false });
+  inp.value = ''; qtyInp.value = ''; saveState(); render();
+  setTimeout(() => { const el = document.getElementById('addInput-'+secId); if (el) el.focus(); }, 50);
+}
+function addSection() {
+  state.sections.push({ id: uid(), icon: '🛒', title: 'Nuova Sezione', items: [] });
+  saveState(); render();
+  setTimeout(() => { const last = state.sections[state.sections.length-1]; if (last) editSectionTitle(last.id); }, 60);
+}
+function deleteSection(secId) {
+  state.sections = state.sections.filter(s => s.id !== secId); saveState(); render();
+}
+function moveSectionUp(secId) {
+  const idx = state.sections.findIndex(s => s.id === secId);
+  if (idx > 0) { [state.sections[idx-1], state.sections[idx]] = [state.sections[idx], state.sections[idx-1]]; saveState(); render(); }
+}
+function moveSectionDown(secId) {
+  const idx = state.sections.findIndex(s => s.id === secId);
+  if (idx < state.sections.length-1) { [state.sections[idx+1], state.sections[idx]] = [state.sections[idx], state.sections[idx+1]]; saveState(); render(); }
+}
+function clearDone() {
+  state.sections.forEach(s => { s.items = s.items.filter(i => !i.done); }); saveState(); render();
+  showToast('Prodotti spuntati rimossi');
+}
+function resetAll() {
+  if (!confirm('Resettare tutta la lista? Preferiti e selezione verranno persi.')) return;
+  state = { sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)) }; saveState(); render();
+  showToast('Lista resettata');
+}
+function exportList() {
+  let out = '🛒 LISTA SPESA\n\n';
+  const useSelected = selCount() > 0;
+  state.sections.forEach(s => {
+    const items = s.items.filter(i => useSelected ? i.sel && !i.done : !i.done && !i.hidden);
+    if (!items.length) return;
+    out += `${s.icon} ${s.title.toUpperCase()}\n`;
+    items.forEach(i => { out += `  • ${i.label}${i.qty ? ' — '+i.qty : ''}${i.note ? ' ('+i.note+')' : ''}\n`; });
+    out += '\n';
+  });
+  if (useSelected) out = '🛒 SPESA DI OGGI\n\n' + out.split('\n').slice(2).join('\n');
+  navigator.clipboard.writeText(out).then(() => showToast('Lista copiata!')).catch(() => showToast('Copia non riuscita'));
+}
+
+// ─── INLINE EDIT ─────────────────────────────────────────────────
+function editSectionTitle(secId) {
+  const sec = getSec(secId); if (!sec) return;
+  const el = document.getElementById('stitle-'+secId); if (!el) return;
+  const inp = document.createElement('input'); inp.className = 'section-title-input'; inp.value = sec.title;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const commit = () => { sec.title = inp.value.trim() || sec.title; saveState(); render(); };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+function editItemLabel(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  const el = document.querySelector(`[data-sec-id="${secId}"] [data-item-id="${itemId}"] .item-label`); if (!el) return;
+  const inp = document.createElement('input'); inp.className = 'item-label-input'; inp.value = item.label;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const commit = () => { item.label = inp.value.trim() || item.label; saveState(); render(); };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+function editItemQty(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  const el = document.querySelector(`[data-sec-id="${secId}"] [data-item-id="${itemId}"] .item-qty`); if (!el) return;
+  const inp = document.createElement('input'); inp.className = 'item-qty-input'; inp.value = item.qty; inp.placeholder = 'es. 500g';
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const commit = () => { item.qty = inp.value.trim(); saveState(); render(); };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+function editItemNote(secId, itemId) {
+  const item = getItem(secId, itemId); if (!item) return;
+  const el = document.querySelector(`[data-sec-id="${secId}"] [data-item-id="${itemId}"] .item-note`); if (!el) return;
+  const inp = document.createElement('input'); inp.className = 'item-note-input'; inp.value = item.note; inp.placeholder = 'nota…';
+  el.replaceWith(inp); inp.focus();
+  const commit = () => { item.note = inp.value.trim(); saveState(); render(); };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+const ICONS = ['🥦','🥩','🧀','🌾','💊','🫙','🍳','🥛','🍎','🫐','🥚','🧄','🧅','🥐','🍞','🐟','🍗','🥜','🛒','🧴'];
+function changeIcon(secId) {
+  const sec = getSec(secId); if (!sec) return;
+  sec.icon = ICONS[(ICONS.indexOf(sec.icon) + 1) % ICONS.length]; saveState(); render();
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._to); t._to = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+loadState();
+render();
+</script>
+</body>
+</html>

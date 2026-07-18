@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Vacanza</title>
+<link href="../fonts/fonts.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111;
+    --gold: #C9A84C;
+    --gold-dim: rgba(201,168,76,0.13);
+    --gold-b: rgba(201,168,76,0.35);
+    --red: #BF1E2D;
+    --ow: #f0ede8;
+    --g2: #1a1a1a;
+    --g3: #2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ow); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 20px 14px 80px; }
+
+  .pio-home{position:absolute;left:0;top:0;width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;text-decoration:none;}
+  .pio-home:active{transform:scale(0.92);}
+  .pio-home svg{width:20px;height:20px;}
+  header { position: relative; text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--gold-b); }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 2px; color: var(--ow); line-height: 1; }
+  h1 span { color: var(--gold); }
+  .meta { margin-top: 6px; font-size: 11px; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+
+  .pbwrap { background: var(--g2); border: 1px solid var(--gold-b); border-radius: 4px; height: 6px; margin: 0 auto 6px; overflow: hidden; }
+  .pb { height: 100%; background: linear-gradient(90deg,var(--gold),#e8c96a); width: 0%; transition: width .4s; border-radius: 4px; }
+  .plabel { text-align: center; font-size: 12px; color: var(--gold); font-weight: 600; margin-bottom: 14px; }
+
+  /* Filter button */
+  .filter-bar { display: flex; justify-content: center; margin-bottom: 20px; }
+  .filter-btn {
+    background: transparent; border: 1px solid #333; color: #666;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all .2s;
+  }
+  .filter-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* Section */
+  .section { margin-bottom: 24px; }
+  .sec-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--gold-b); }
+  .sec-icon { font-size: 16px; flex-shrink: 0; }
+  .sec-title-input {
+    font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 2px; color: var(--gold);
+    background: transparent; border: none; outline: none; flex: 1; min-width: 0;
+    border-bottom: 1px solid transparent;
+  }
+  .sec-title-input:focus { border-bottom-color: var(--gold-b); }
+  .sec-count { font-size: 11px; color: #555; white-space: nowrap; flex-shrink: 0; }
+  .sec-del { width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(191,30,45,0.15); color: var(--red); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .items { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ITEM - two rows */
+  .item { background: var(--g2); border: 1px solid #222; border-radius: 8px; padding: 10px 10px 8px; transition: opacity .2s; }
+  .item.done { background: var(--gold-dim); border-color: rgba(201,168,76,0.35); }
+  .item.hidden { opacity: 0.2; }
+
+  /* Row 1: checkbox + label */
+  .item-top { display: flex; align-items: flex-start; gap: 10px; }
+  .chk {
+    width: 20px; height: 20px; border: 1.5px solid #444; border-radius: 4px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; margin-top: 1px;
+  }
+  .item.done .chk { background: var(--gold); border-color: var(--gold); }
+  .tick { display: none; }
+  .item.done .tick { display: block; }
+  .item-label {
+    font-size: 14px; color: var(--ow); line-height: 1.4; flex: 1;
+    cursor: pointer; word-break: break-word;
+  }
+  .item.done .item-label { text-decoration: line-through; color: #777; }
+  .item.hidden .item-label { color: #555; }
+  .must {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 2px 6px;
+    border-radius: 3px; text-transform: uppercase; flex-shrink: 0; margin-top: 2px;
+    background: rgba(191,30,45,0.18); color: var(--red); border: 1px solid rgba(191,30,45,0.28);
+  }
+
+  /* Row 2: buttons */
+  .item-btns { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 7px; border-top: 1px solid #222; }
+  .item.done .item-btns { border-top-color: rgba(201,168,76,0.2); }
+
+  .ibtn {
+    height: 28px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; padding: 0 10px;
+    transition: background .15s;
+  }
+  .ibtn:disabled { opacity: 0.18; cursor: default; }
+
+  .btn-up   { background: rgba(255,255,255,0.05); color: #777; }
+  .btn-dn   { background: rgba(255,255,255,0.05); color: #777; }
+  .btn-eye  { background: rgba(255,255,255,0.05); color: #777; }
+  .btn-del  { background: rgba(191,30,45,0.15); color: var(--red); margin-left: auto; }
+
+  .item.hidden .btn-eye { color: var(--gold); background: rgba(201,168,76,0.1); }
+
+  .ibtn:active { opacity: 0.7; }
+
+  /* inline label edit */
+  .item-label-input {
+    font-size: 14px; color: var(--ow); line-height: 1.4; flex: 1;
+    background: transparent; border: none; outline: none; padding: 0;
+    font-family: 'DM Sans', sans-serif; word-break: break-word;
+    border-bottom: 1px solid transparent;
+  }
+  .item-label-input:focus { border-bottom-color: #444; }
+  .item.done .item-label-input { text-decoration: line-through; color: #777; }
+  .item.hidden .item-label-input { color: #555; }
+
+  /* Add row */
+  .add-row { display: flex; gap: 7px; margin-top: 8px; }
+  .add-input { flex: 1; background: var(--g2); border: 1px dashed #2e2e2e; border-radius: 6px; padding: 9px 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ow); outline: none; }
+  .add-input::placeholder { color: #3a3a3a; }
+  .add-input:focus { border-color: var(--gold-b); border-style: solid; }
+  .add-btn { background: transparent; border: 1px solid var(--gold-b); color: var(--gold); font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px; padding: 0 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+
+  .add-sec-wrap { margin: 4px 0 0; }
+  .add-sec-btn { width: 100%; padding: 11px; background: transparent; border: 1px dashed #222; border-radius: 6px; color: #333; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .add-sec-btn:active { border-color: var(--gold-b); color: var(--gold); }
+
+  .bottom { margin: 28px 0 0; display: flex; justify-content: center; }
+  .reset-btn { background: transparent; border: 1px solid #222; color: #333; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 22px; border-radius: 4px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="pio-home" aria-label="Torna alla home POL-IN-ONE">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+  </a>
+  <h1>PACK<span>LIST</span></h1>
+  <div class="meta">Mare + Palestra · 11 giorni · Caldo · Lavatrice disponibile</div>
+</header>
+
+<div class="pbwrap"><div class="pb" id="bar"></div></div>
+<div class="plabel" id="prog"></div>
+
+<div class="filter-bar">
+  <button class="filter-btn" id="filterBtn">☑ Solo da fare</button>
+</div>
+
+<div id="app"></div>
+
+<div class="add-sec-wrap">
+  <button class="add-sec-btn" id="addSecBtn">+ Aggiungi sezione</button>
+</div>
+
+<div class="bottom" style="gap:10px;">
+  <button class="reset-btn" id="copyBtn">⧉ Copia lista</button>
+  <button class="reset-btn" id="resetBtn">↺ Reset spunte</button>
+</div>
+
+<script>
+var DATA = [
+  {icon:"🪪",title:"DOCUMENTI & ESSENZIALI",items:[
+    {l:"Passaporto / C.I. valida",m:1,d:0,h:0},
+    {l:"Patente",m:0,d:0,h:0},
+    {l:"Docs viaggio (voli / hotel)",m:1,d:0,h:0},
+    {l:"Carta di credito + bancomat",m:1,d:0,h:0},
+    {l:"Cash + doppio borsello",m:0,d:0,h:0},
+    {l:"Assicurazione viaggio",m:0,d:0,h:0},
+    {l:"Telefono + caricatore",m:1,d:0,h:0},
+    {l:"Powerbank",m:0,d:0,h:0},
+    {l:"Portatile + caricatore",m:0,d:0,h:0},
+    {l:"Adattatori corrente",m:0,d:0,h:0},
+    {l:"Pesa valigia",m:0,d:0,h:0},
+    {l:"Scotch",m:0,d:0,h:0},
+    {l:"Libri",m:0,d:0,h:0},
+  ]},
+  {icon:"🩴",title:"ABBIGLIAMENTO",items:[
+    {l:"Costumi x2",m:0,d:0,h:0},
+    {l:"Mutande normale x4–5",m:0,d:0,h:0},
+    {l:"Mutande palestra x2",m:0,d:0,h:0},
+    {l:"Canotte + notte x2",m:0,d:0,h:0},
+    {l:"T-shirt leggere x3–4",m:0,d:0,h:0},
+    {l:"Shorts / pantaloncini x2–3",m:0,d:0,h:0},
+    {l:"Camicia sera x1–2",m:0,d:0,h:0},
+    {l:"Calzini x4 paia",m:0,d:0,h:0},
+    {l:"Infradito / sandali",m:0,d:0,h:0},
+    {l:"Scarpe fuori (sneakers)",m:0,d:0,h:0},
+    {l:"Occhiali da sole",m:0,d:0,h:0},
+    {l:"Occhiali da vista",m:0,d:0,h:0},
+    {l:"Lenti + liquido",m:0,d:0,h:0},
+  ]},
+  {icon:"🏋️",title:"PALESTRA & ALLENAMENTO",items:[
+    {l:"Scarpe da allenamento",m:1,d:0,h:0},
+    {l:"Pantaloncini da gym x2",m:0,d:0,h:0},
+    {l:"T-shirt da gym x2",m:0,d:0,h:0},
+    {l:"Bolero",m:0,d:0,h:0},
+    {l:"Cintura",m:0,d:0,h:0},
+    {l:"Ginocchiere",m:0,d:0,h:0},
+    {l:"Polsiere + straps",m:0,d:0,h:0},
+    {l:"Asciugamano palestra",m:0,d:0,h:0},
+    {l:"Zaino palestra",m:0,d:0,h:0},
+    {l:"Cuffie + ricaricatore",m:0,d:0,h:0},
+    {l:"Orologio + ricaricatore",m:0,d:0,h:0},
+    {l:"Tripod + telecomando",m:0,d:0,h:0},
+    {l:"Shake bottle / tupperware",m:0,d:0,h:0},
+    {l:"Prep + salviette + accessori",m:0,d:0,h:0},
+    {l:"Imbuto / imbutino",m:0,d:0,h:0},
+  ]},
+  {icon:"💊",title:"SUPPLEMENTI & INTEGRATORI",items:[
+    {l:"Integrazioni + scatolina x11gg",m:1,d:0,h:0},
+    {l:"Proteine in polvere (pre-dosate)",m:0,d:0,h:0},
+    {l:"Creatina",m:0,d:0,h:0},
+    {l:"Omega-3",m:0,d:0,h:0},
+    {l:"Multivitaminico",m:0,d:0,h:0},
+    {l:"Elettroliti / sali minerali",m:0,d:0,h:0},
+    {l:"Protocollo avanzato x11gg",m:1,d:0,h:0},
+    {l:"Kit siringhe / aghi / alcol",m:1,d:0,h:0},
+    {l:"Contenitore sharps",m:1,d:0,h:0},
+    {l:"Farmaci base (antidol. / antist.)",m:0,d:0,h:0},
+    {l:"Bilancia cibo + batterie",m:0,d:0,h:0},
+  ]},
+  {icon:"🧴",title:"IGIENE & CURA PERSONALE",items:[
+    {l:"Spazzolino + dentifricio",m:0,d:0,h:0},
+    {l:"Prodotti bagno (sh. / bals. / doc.)",m:0,d:0,h:0},
+    {l:"Deodorante",m:0,d:0,h:0},
+    {l:"Rasoio / dopobarba",m:0,d:0,h:0},
+    {l:"Crema capelli",m:0,d:0,h:0},
+    {l:"Crema idratante",m:0,d:0,h:0},
+    {l:"Cura unghie",m:0,d:0,h:0},
+    {l:"Crema solare SPF 30–50",m:1,d:0,h:0},
+    {l:"After sun / aloe vera",m:0,d:0,h:0},
+    {l:"Profumo",m:0,d:0,h:0},
+    {l:"Salviettine / disinfettante",m:0,d:0,h:0},
+    {l:"Bilancia corporea + batterie",m:0,d:0,h:0},
+  ]},
+  {icon:"🏖️",title:"SPIAGGIA",items:[
+    {l:"Telo da mare grande",m:0,d:0,h:0},
+    {l:"Borsa da spiaggia",m:0,d:0,h:0},
+    {l:"Infradito mare / scoglio",m:0,d:0,h:0},
+    {l:"Maschera + boccaglio",m:0,d:0,h:0},
+  ]},
+  {icon:"🧳",title:"ORGANIZZAZIONE VALIGIA",items:[
+    {l:"Valigia / trolley",m:1,d:0,h:0},
+    {l:"Borsa a mano / zaino cabina",m:0,d:0,h:0},
+    {l:"Packing cubes / organizer",m:0,d:0,h:0},
+    {l:"Sacchetto biancheria sporca",m:0,d:0,h:0},
+    {l:"Lucchetto valigia",m:0,d:0,h:0},
+    {l:"Sacchetto liquidi (carry-on)",m:0,d:0,h:0},
+  ]},
+  {icon:"📌",title:"PROMEMORIA",items:[
+    {l:"Pulire scarpe bianche",m:0,d:0,h:0},
+  ]},
+];
+
+var MIGRATIONS = {
+  "Passaporto / Carta d'identità valida":"Passaporto / C.I. valida",
+  "Docs viaggio (biglietti aerei / hotel)":"Docs viaggio (voli / hotel)",
+  "Assicurazione viaggio / sanitaria":"Assicurazione viaggio",
+  "Mutande/costume palestra x2":"Mutande palestra x2",
+  "Camicia per la sera x1–2":"Camicia sera x1–2",
+  "Scarpe fuori (sneakers/casual)":"Scarpe fuori (sneakers)",
+  "Lenti a contatto + liquido":"Lenti + liquido",
+  "Asciugamano/i palestra":"Asciugamano palestra",
+  "Tripod + telecomando (carico)":"Tripod + telecomando",
+  "Integrazioni + scatolina (dosaggi x11gg)":"Integrazioni + scatolina x11gg",
+  "Supplementi protocollo avanzato (x11gg)":"Protocollo avanzato x11gg",
+  "Contenitore sharps per smaltimento":"Contenitore sharps",
+  "Farmaci di base (antidolorifico, antistaminico)":"Farmaci base (antidol. / antist.)",
+  "Prodotti bagno (shampoo, balsamo, doccia)":"Prodotti bagno (sh. / bals. / doc.)",
+  "Salviettine / disinfettante mani":"Salviettine / disinfettante",
+  "Maschera + boccaglio (opzionale)":"Maschera + boccaglio",
+  "Valigia / trolley (misura corretta per il volo)":"Valigia / trolley",
+  "Packing cubes o sacchetti organizer":"Packing cubes / organizer",
+  "Sacchetto per biancheria sporca":"Sacchetto biancheria sporca",
+  "Sacchetto liquidi trasparente (carry-on)":"Sacchetto liquidi (carry-on)",
+};
+
+var KEY = 'ep_v12';
+var filterActive = false;
+
+function load() {
+  try {
+    var s = JSON.parse(localStorage.getItem(KEY));
+    if (!s || !s.length) throw '';
+    s.forEach(function(sec){ sec.items.forEach(function(it){ if(MIGRATIONS[it.l]) it.l=MIGRATIONS[it.l]; }); });
+    save(s);
+    return s;
+  } catch(e) {}
+  // try migrating from old key
+  try {
+    var old = JSON.parse(localStorage.getItem('ep_v11'));
+    if (old && old.length) {
+      old.forEach(function(sec){ sec.items.forEach(function(it){ if(MIGRATIONS[it.l]) it.l=MIGRATIONS[it.l]; if(!it.h) it.h=0; }); });
+      save(old);
+      return old;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DATA));
+}
+
+function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+
+function updateProgress() {
+  var st = load();
+  var total=0, done=0;
+  st.forEach(function(sec){ sec.items.forEach(function(it){ if(!it.h){total++; if(it.d) done++;} }); });
+  document.getElementById('bar').style.width = total?(done/total*100)+'%':'0%';
+  document.getElementById('prog').textContent = done+' / '+total+' completati';
+}
+
+function render() {
+  var st = load();
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+
+  st.forEach(function(sec, si) {
+    var visibleItems = filterActive
+      ? sec.items.filter(function(i){ return !i.d && !i.h; })
+      : sec.items;
+    if (filterActive && visibleItems.length === 0) return;
+
+    var secDone = sec.items.filter(function(i){ return i.d && !i.h; }).length;
+    var secTotal = sec.items.filter(function(i){ return !i.h; }).length;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'section';
+
+    // Section header
+    var hdr = document.createElement('div');
+    hdr.className = 'sec-hdr';
+
+    var ico = document.createElement('span');
+    ico.className = 'sec-icon';
+    ico.textContent = sec.icon;
+    hdr.appendChild(ico);
+
+    var tinp = document.createElement('input');
+    tinp.className = 'sec-title-input';
+    tinp.type = 'text';
+    tinp.value = sec.title;
+    tinp.maxLength = 60;
+    (function(sIdx){ tinp.addEventListener('change', function(){
+      var st2=load(); st2[sIdx].title=tinp.value.trim()||st2[sIdx].title; save(st2);
+    }); })(si);
+    hdr.appendChild(tinp);
+
+    var cnt = document.createElement('span');
+    cnt.className = 'sec-count';
+    cnt.textContent = secDone+'/'+secTotal;
+    hdr.appendChild(cnt);
+
+    if (!filterActive) {
+      var sdel = document.createElement('button');
+      sdel.className = 'sec-del';
+      sdel.textContent = '×';
+      (function(sIdx){ sdel.addEventListener('click', function(){
+        var st2=load(); st2.splice(sIdx,1); save(st2); render();
+      }); })(si);
+      hdr.appendChild(sdel);
+    }
+
+    wrap.appendChild(hdr);
+
+    // Items
+    var il = document.createElement('div');
+    il.className = 'items';
+
+    // In filter mode use visibleItems (with original indices); normal mode use all
+    var itemsToRender = filterActive ? visibleItems.map(function(item){
+      return { item: item, ii: sec.items.indexOf(item) };
+    }) : sec.items.map(function(item, ii){ return { item: item, ii: ii }; });
+
+    itemsToRender.forEach(function(entry) {
+      var item = entry.item;
+      var ii = entry.ii;
+
+      var row = document.createElement('div');
+      row.className = 'item' + (item.d?' done':'') + (item.h?' hidden':'');
+
+      // Row 1: checkbox + label
+      var top = document.createElement('div');
+      top.className = 'item-top';
+
+      var chk = document.createElement('div');
+      chk.className = 'chk';
+      chk.innerHTML = '<svg class="tick" width="10" height="7" viewBox="0 0 10 7" fill="none"><polyline points="1,3.5 4,6.5 9,1" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      (function(sIdx,iIdx){ chk.addEventListener('click', function(){
+        var st2=load(); st2[sIdx].items[iIdx].d=st2[sIdx].items[iIdx].d?0:1; save(st2); render();
+      }); })(si,ii);
+      top.appendChild(chk);
+
+      var linp = document.createElement('input');
+      linp.className = 'item-label-input';
+      linp.type = 'text';
+      linp.value = item.l;
+      linp.maxLength = 120;
+      (function(sIdx,iIdx){ 
+        linp.addEventListener('change', function(){
+          var st2=load(); var v=linp.value.trim();
+          if(v){st2[sIdx].items[iIdx].l=v; save(st2);}
+          else linp.value=load()[sIdx].items[iIdx].l;
+        });
+        linp.addEventListener('click', function(e){ e.stopPropagation(); });
+      })(si,ii);
+      top.appendChild(linp);
+
+      if (item.m) {
+        var must = document.createElement('span');
+        must.className = 'must';
+        must.textContent = 'Must';
+        top.appendChild(must);
+      }
+
+      row.appendChild(top);
+
+      // Row 2: buttons
+      var btns = document.createElement('div');
+      btns.className = 'item-btns';
+
+      var upb = document.createElement('button');
+      upb.className = 'ibtn btn-up';
+      upb.textContent = '▲ Su';
+      upb.disabled = (ii === 0);
+      (function(sIdx,iIdx){ upb.addEventListener('click', function(e){
+        e.stopPropagation();
+        var st2=load(); var a=st2[sIdx].items; var t=a[iIdx-1]; a[iIdx-1]=a[iIdx]; a[iIdx]=t; save(st2); render();
+      }); })(si,ii);
+      btns.appendChild(upb);
+
+      var dnb = document.createElement('button');
+      dnb.className = 'ibtn btn-dn';
+      dnb.textContent = '▼ Giù';
+      dnb.disabled = (ii === sec.items.length-1);
+      (function(sIdx,iIdx){ dnb.addEventListener('click', function(e){
+        e.stopPropagation();
+        var st2=load(); var a=st2[sIdx].items; var t=a[iIdx+1]; a[iIdx+1]=a[iIdx]; a[iIdx]=t; save(st2); render();
+      }); })(si,ii);
+      btns.appendChild(dnb);
+
+      var eyeb = document.createElement('button');
+      eyeb.className = 'ibtn btn-eye';
+      eyeb.textContent = item.h ? '👁 Mostra' : '👁 Nascondi';
+      (function(sIdx,iIdx){ eyeb.addEventListener('click', function(e){
+        e.stopPropagation();
+        var st2=load(); st2[sIdx].items[iIdx].h=st2[sIdx].items[iIdx].h?0:1; save(st2); render();
+      }); })(si,ii);
+      btns.appendChild(eyeb);
+
+      var xb = document.createElement('button');
+      xb.className = 'ibtn btn-del';
+      xb.textContent = '✕';
+      (function(sIdx,iIdx){ xb.addEventListener('click', function(e){
+        e.stopPropagation();
+        var st2=load(); st2[sIdx].items.splice(iIdx,1); save(st2); render();
+      }); })(si,ii);
+      btns.appendChild(xb);
+
+      row.appendChild(btns);
+      il.appendChild(row);
+    });
+
+    wrap.appendChild(il);
+
+    // Add row (not in filter mode)
+    if (!filterActive) {
+      var ar = document.createElement('div');
+      ar.className = 'add-row';
+      var ai = document.createElement('input');
+      ai.className = 'add-input';
+      ai.type = 'text';
+      ai.placeholder = '+ Aggiungi voce…';
+      ai.maxLength = 100;
+      var ab = document.createElement('button');
+      ab.className = 'add-btn';
+      ab.textContent = 'AGGIUNGI';
+      (function(sIdx, input){
+        function doAdd(){
+          var v=input.value.trim(); if(!v) return;
+          input.value='';
+          var st2=load(); st2[sIdx].items.push({l:v,m:0,d:0,h:0}); save(st2); render();
+        }
+        ab.addEventListener('click', doAdd);
+        input.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();doAdd();} });
+      })(si, ai);
+      ar.appendChild(ai); ar.appendChild(ab);
+      wrap.appendChild(ar);
+    }
+
+    app.appendChild(wrap);
+  });
+
+  document.getElementById('addSecBtn').style.display = filterActive ? 'none' : '';
+  updateProgress();
+}
+
+document.getElementById('filterBtn').addEventListener('click', function(){
+  filterActive = !filterActive;
+  this.classList.toggle('active', filterActive);
+  this.textContent = filterActive ? '✕ Mostra tutto' : '☑ Solo da fare';
+  render();
+});
+
+document.getElementById('addSecBtn').addEventListener('click', function(){
+  var st=load(); st.push({icon:'📋',title:'NUOVA SEZIONE',items:[]}); save(st); render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  var st=load(); st.forEach(function(s){s.items.forEach(function(i){i.d=0;})}); save(st); render();
+});
+
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var st=load();
+  var out='🧳 PACKLIST\n\n';
+  st.forEach(function(sec){
+    var items=sec.items.filter(function(i){return !i.h;});
+    if(!items.length) return;
+    out+=sec.icon+' '+sec.title+'\n';
+    items.forEach(function(i){
+      out+='  '+(i.d?'[x]':'[ ]')+' '+i.l+(i.m?' (MUST)':'')+'\n';
+    });
+    out+='\n';
+  });
+  var btn=this;
+  function done(ok){ btn.textContent=ok?'✓ Copiata':'✕ Errore'; setTimeout(function(){btn.textContent='⧉ Copia lista';},1500); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(out).then(function(){done(true);},function(){done(false);});
+  } else { done(false); }
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,11 +1,21 @@
-const CACHE_NAME = 'espresso-log-v5';
+const CACHE_NAME = 'pol-in-one-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './polspresso/index.html',
+  './lista-spesa/index.html',
+  './packlist/index.html',
+  './fonts/fonts.css',
+  './fonts/bebas-neue-latin-400-normal.woff2',
+  './fonts/dm-sans-latin-300-normal.woff2',
+  './fonts/dm-sans-latin-400-normal.woff2',
+  './fonts/dm-sans-latin-400-italic.woff2',
+  './fonts/dm-sans-latin-500-normal.woff2',
+  './fonts/dm-sans-latin-600-normal.woff2'
 ];
 
 self.addEventListener('install', (e) => {
@@ -24,19 +34,21 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// network-first per index.html (cosi le modifiche future arrivano subito se online),
-// cache-first per il resto (icone/manifest, non cambiano quasi mai)
+// network-first per le pagine HTML (aggiornamenti subito se online),
+// cache-first per il resto (font/icone, stabili)
 self.addEventListener('fetch', (e) => {
-  if(e.request.mode === 'navigate' || e.request.url.endsWith('index.html')){
+  const req = e.request;
+  if(req.mode === 'navigate' || (req.destination === 'document')){
     e.respondWith(
-      fetch(e.request).then(res => {
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, res.clone()));
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         return res;
-      }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
+      }).catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
     );
     return;
   }
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(req).then(cached => cached || fetch(req))
   );
 });

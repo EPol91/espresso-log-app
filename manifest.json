@@ -1,7 +1,7 @@
 {
-  "name": "Polspresso — Espresso Log ES600EU",
-  "short_name": "Polspresso",
-  "description": "Log shot espresso Ninja Luxe Café ES600EU con analisi grafica",
+  "name": "POL-IN-ONE",
+  "short_name": "POL-IN-ONE",
+  "description": "I tuoi strumenti personali in un'unica app: Polspresso, Lista Spesa, Packlist",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

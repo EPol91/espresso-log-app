@@ -1,51 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e8c65a"/>
-      <stop offset="1" stop-color="#c9a227"/>
-    </linearGradient>
-    <linearGradient id="coffee" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4a2c17"/>
-      <stop offset="1" stop-color="#2a160b"/>
-    </linearGradient>
-  </defs>
-
-  <!-- sfondo -->
-  <rect width="512" height="512" rx="96" fill="#0d0d0d"/>
-  <rect x="8" y="8" width="496" height="496" rx="90" fill="none" stroke="#c9a227" stroke-width="6" opacity="0.55"/>
-
-  <!-- vapore -->
-  <g fill="none" stroke="#c9a227" stroke-width="12" stroke-linecap="round" opacity="0.8">
-    <path d="M212 150 C 196 128, 228 116, 212 92 C 200 74, 224 62, 212 44"/>
-    <path d="M300 150 C 284 128, 316 116, 300 92 C 288 74, 312 62, 300 44"/>
-  </g>
-
-  <!-- piattino -->
-  <ellipse cx="256" cy="420" rx="150" ry="26" fill="url(#cup)"/>
-  <ellipse cx="256" cy="414" rx="150" ry="24" fill="#0d0d0d" opacity="0.25"/>
-
-  <!-- corpo tazzina -->
-  <path d="M150 232 h212 v54 a106 106 0 0 1 -212 0 z" fill="url(#cup)"/>
-  <!-- caffè in superficie -->
-  <ellipse cx="256" cy="232" rx="106" ry="24" fill="url(#coffee)"/>
-  <ellipse cx="256" cy="230" rx="106" ry="22" fill="none" stroke="#6b4326" stroke-width="4" opacity="0.6"/>
-  <!-- crema (riflesso) -->
-  <ellipse cx="230" cy="226" rx="34" ry="8" fill="#8a5a30" opacity="0.55"/>
-
-  <!-- manico -->
-  <path d="M362 262 a54 54 0 0 1 0 84" fill="none" stroke="url(#cup)" stroke-width="26" stroke-linecap="round"/>
-
-  <!-- chicchi di caffè -->
-  <g fill="#c9a227">
-    <g transform="translate(120 372) rotate(-25)">
-      <ellipse cx="0" cy="0" rx="26" ry="17" fill="#3a2413"/>
-      <ellipse cx="0" cy="0" rx="26" ry="17" fill="none" stroke="#c9a227" stroke-width="3"/>
-      <path d="M0 -15 C -8 -6, -8 6, 0 15" fill="none" stroke="#c9a227" stroke-width="4"/>
-    </g>
-    <g transform="translate(392 378) rotate(28)">
-      <ellipse cx="0" cy="0" rx="26" ry="17" fill="#3a2413"/>
-      <ellipse cx="0" cy="0" rx="26" ry="17" fill="none" stroke="#c9a227" stroke-width="3"/>
-      <path d="M0 -15 C -8 -6, -8 6, 0 15" fill="none" stroke="#c9a227" stroke-width="4"/>
-    </g>
-  </g>
+  <rect width="512" height="512" rx="112" fill="#0d0d0d"/>
+  <rect x="30" y="30" width="452" height="452" rx="90" fill="none" stroke="#C9A84C" stroke-width="9" opacity="0.45"/>
+  <text x="256" y="200" font-family="Oswald" font-weight="600" font-size="112" letter-spacing="10" fill="#f0ede8" text-anchor="middle">POL</text>
+  <line x1="140" y1="248" x2="200" y2="248" stroke="#C9A84C" stroke-width="6"/>
+  <text x="256" y="272" font-family="Oswald" font-weight="500" font-size="62" letter-spacing="14" fill="#C9A84C" text-anchor="middle">IN</text>
+  <line x1="312" y1="248" x2="372" y2="248" stroke="#C9A84C" stroke-width="6"/>
+  <text x="256" y="400" font-family="Oswald" font-weight="600" font-size="112" letter-spacing="10" fill="#f0ede8" text-anchor="middle">ONE</text>
 </svg>
