@@ -56,7 +56,7 @@
   .items { display: flex; flex-direction: column; gap: 6px; }
 
   /* ITEM - two rows */
-  .item { background: var(--g2); border: 1px solid #222; border-radius: 8px; padding: 10px 10px 8px; transition: opacity .2s; }
+  .item { background: var(--g2); border: 1px solid #222; border-radius: 8px; padding: 10px 10px 8px; transition: transform .12s ease, box-shadow .12s ease, opacity .2s; }
   .item.done { background: var(--gold-dim); border-color: rgba(212,175,55,0.35); }
   .item.hidden { opacity: 0.2; }
 
@@ -100,7 +100,10 @@
   .btn-del  { background: rgba(191,30,45,0.15); color: var(--red); margin-left: auto; }
   .btn-drag { background: rgba(212,175,55,0.12); color: var(--gold); cursor: grab; touch-action: none; }
   .btn-drag:active { cursor: grabbing; opacity: 1; }
-  .item.dragging { opacity: .55; border-color: var(--gold-b); touch-action: none; }
+  .item.dragging {
+    border-color: var(--gold); transform: scale(1.03); position: relative; z-index: 20; touch-action: none;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.55), 0 0 14px rgba(212,175,55,0.55);
+  }
 
   .item.hidden .btn-eye { color: var(--gold); background: rgba(212,175,55,0.1); }
 
@@ -501,7 +504,7 @@ document.getElementById('resetBtn').addEventListener('click', function(){
 // ── Drag-to-reorder: LONG-PRESS sulla riga (tieni premuto ~400ms) ──
 // Touch events (touchmove non-passive) per bloccare lo scroll durante il drag.
 var _pk=null; var _pkSuppress=false;
-var PK_MS=400, PK_MOVE=12;
+var PK_MS=250, PK_MOVE=12;
 function pkPressStart(x,y,row,isTouch){
   _pk={item:row, container:row.parentElement, sx:x, sy:y, dragging:false, isTouch:isTouch, timer:null};
   _pk.timer=setTimeout(function(){

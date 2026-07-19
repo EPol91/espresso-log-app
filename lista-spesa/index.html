@@ -124,13 +124,17 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 
 /* ── ITEMS ── */
 .items-list { padding: 2px 0; }
-.item { border-bottom: 1px solid var(--border); transition: background .15s; }
+.item { border-bottom: 1px solid var(--border); transition: transform .12s ease, box-shadow .12s ease, background .15s; }
 .item:last-child { border-bottom: none; }
 .item.done .item-label { text-decoration: line-through; color: var(--text-dim); }
 .item.selected-item { background: rgba(212,175,55,0.06); }
 
 .item-row1 { display: flex; align-items: center; padding: 6px 10px 1px 12px; gap: 9px; }
-.item.dragging { opacity: .55; background: rgba(212,175,55,0.1); touch-action: none; }
+.item.dragging {
+  background: var(--surface2); border: 1px solid var(--gold); border-radius: 10px;
+  transform: scale(1.03); position: relative; z-index: 20; touch-action: none;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.55), 0 0 14px rgba(212,175,55,0.55);
+}
 .item-check {
   width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px;
   cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -699,7 +703,7 @@ function moveItemUp(secId, itemId) {
 // Touch events (non-passive touchmove) per bloccare lo scroll in modo affidabile.
 let _lp = null;
 let _suppressClick = false;
-const LP_MS = 400, LP_MOVE = 12;
+const LP_MS = 250, LP_MOVE = 12;
 
 function pressStart(x, y, secId, item, isTouch) {
   _lp = { item, secId, sx: x, sy: y, dragging: false, isTouch, timer: null };
