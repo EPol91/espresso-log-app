@@ -100,7 +100,7 @@
   .btn-del  { background: rgba(191,30,45,0.15); color: var(--red); margin-left: auto; }
   .btn-drag { background: rgba(212,175,55,0.12); color: var(--gold); cursor: grab; touch-action: none; }
   .btn-drag:active { cursor: grabbing; opacity: 1; }
-  .item.dragging { opacity: .55; border-color: var(--gold-b); }
+  .item.dragging { opacity: .55; border-color: var(--gold-b); touch-action: none; }
 
   .item.hidden .btn-eye { color: var(--gold); background: rgba(212,175,55,0.1); }
 
@@ -422,13 +422,6 @@ function render() {
       var btns = document.createElement('div');
       btns.className = 'item-btns';
 
-      if (!filterActive) {
-        var drb = document.createElement('button');
-        drb.className = 'ibtn btn-drag';
-        drb.textContent = '⠿ Trascina';
-        drb.addEventListener('pointerdown', function(e){ pkDragStart(e); });
-        btns.appendChild(drb);
-      }
 
       var eyeb = document.createElement('button');
       eyeb.className = 'ibtn btn-eye';
@@ -449,6 +442,7 @@ function render() {
       btns.appendChild(xb);
 
       row.appendChild(btns);
+      if (!filterActive) { (function(rw){ rw.addEventListener('pointerdown', function(e){ pkRowDown(e, rw); }); })(row); }
       il.appendChild(row);
     });
 
@@ -501,36 +495,51 @@ document.getElementById('resetBtn').addEventListener('click', function(){
   var st=load(); st.forEach(function(s){s.items.forEach(function(i){i.d=0;})}); save(st); render();
 });
 
-// ── Drag-to-reorder (pointer events, touch-friendly) ──
-var _pk=null;
-function pkDragStart(e){
-  e.preventDefault();
-  var item=e.target.closest('.item'); if(!item)return;
-  _pk={item:item, container:item.parentElement};
-  item.classList.add('dragging');
-  try{e.target.setPointerCapture(e.pointerId);}catch(x){}
+// ── Drag-to-reorder: LONG-PRESS sulla riga (tieni premuto ~400ms) ──
+var _pk=null; var _pkSuppress=false;
+var PK_MS=400, PK_MOVE=10;
+function pkRowDown(e, row){
+  if(e.pointerType==='mouse' && e.button!==0) return;
+  _pk={item:row, container:row.parentElement, pid:e.pointerId, sx:e.clientX, sy:e.clientY, dragging:false, timer:null};
+  _pk.timer=setTimeout(function(){
+    if(!_pk)return;
+    _pk.dragging=true;
+    row.classList.add('dragging');
+    if(navigator.vibrate) navigator.vibrate(25);
+    try{row.setPointerCapture(_pk.pid);}catch(x){}
+  }, PK_MS);
 }
 document.addEventListener('pointermove', function(e){
   if(!_pk)return;
+  if(!_pk.dragging){
+    if(Math.abs(e.clientX-_pk.sx)>PK_MOVE||Math.abs(e.clientY-_pk.sy)>PK_MOVE){ clearTimeout(_pk.timer); _pk=null; }
+    return;
+  }
+  e.preventDefault();
   var item=_pk.item, container=_pk.container;
   var others=[].slice.call(container.querySelectorAll('.item:not(.dragging)'));
   var after=null;
   for(var k=0;k<others.length;k++){var r=others[k].getBoundingClientRect(); if(e.clientY<r.top+r.height/2){after=others[k];break;}}
   if(after)container.insertBefore(item,after); else container.appendChild(item);
-});
-function pkDragEnd(){
+}, {passive:false});
+function pkRowUp(){
   if(!_pk)return;
-  var container=_pk.container;
-  _pk.item.classList.remove('dragging');
-  var si=+container.dataset.si;
-  var order=[].slice.call(container.querySelectorAll('.item')).map(function(el){return +el.dataset.ii;});
-  var st=load(); var old=st[si].items.slice();
-  st[si].items=order.map(function(oi){return old[oi];});
-  save(st); render();
+  clearTimeout(_pk.timer);
+  if(_pk.dragging){
+    var container=_pk.container;
+    _pk.item.classList.remove('dragging');
+    var si=+container.dataset.si;
+    var order=[].slice.call(container.querySelectorAll('.item')).map(function(el){return +el.dataset.ii;});
+    var st=load(); var old=st[si].items.slice();
+    st[si].items=order.map(function(oi){return old[oi];});
+    save(st); render();
+    _pkSuppress=true; setTimeout(function(){_pkSuppress=false;},60);
+  }
   _pk=null;
 }
-document.addEventListener('pointerup', pkDragEnd);
-document.addEventListener('pointercancel', pkDragEnd);
+document.addEventListener('pointerup', pkRowUp);
+document.addEventListener('pointercancel', pkRowUp);
+document.addEventListener('click', function(e){ if(_pkSuppress){ e.preventDefault(); e.stopPropagation(); } }, true);
 
 document.getElementById('copyBtn').addEventListener('click', function(){
   var st=load();

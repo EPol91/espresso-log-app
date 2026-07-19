@@ -657,6 +657,7 @@ function saveEntry(){
   var ex=state.entries.filter(function(e){return e.date===date;})[0];
   if(ex){ex.kg=n2(kg);ex.bf=bf==null?null:n1(bf);ex.note=note;toast('Pesata <b>'+date+'</b> aggiornata');}
   else{state.entries.push({date:date,kg:n2(kg),bf:bf==null?null:n1(bf),note:note});toast('Pesata <b>'+date+'</b> salvata');}
+  if(navigator.vibrate) navigator.vibrate([10,40,10]);
   save();document.getElementById('e_kg').value='';document.getElementById('e_bf').value='';document.getElementById('e_note').value='';document.getElementById('e_date').value=today();document.getElementById('saveBtn').textContent='Salva';syncDayBtns();
   render();
 }

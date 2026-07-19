@@ -130,7 +130,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .item.selected-item { background: rgba(212,175,55,0.06); }
 
 .item-row1 { display: flex; align-items: center; padding: 6px 10px 1px 12px; gap: 9px; }
-.item.dragging { opacity: .55; background: rgba(212,175,55,0.1); }
+.item.dragging { opacity: .55; background: rgba(212,175,55,0.1); touch-action: none; }
 .item-check {
   width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px;
   cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -465,9 +465,9 @@ function renderLista() {
           <span class="item-note${item.note ? '' : ' empty'}" onclick="editItemNote('${sec.id}','${item.id}')">${item.note ? escHtml(item.note) : ''}</span>
           <button class="btn-act star${item.fav ? ' on' : ''}" onclick="toggleFav('${sec.id}','${item.id}')" title="Preferito">⭐</button>
           <button class="btn-act cart${item.sel ? ' on' : ''}" onclick="toggleSel('${sec.id}','${item.id}')" title="Aggiungi alla spesa">🛒</button>
-          <button class="btn-act drag" onpointerdown="dragStart(event,'${sec.id}')" title="Trascina per riordinare">⠿</button>
           <button class="btn-act del" onclick="deleteItem('${sec.id}','${item.id}')">✕</button>
         </div>`;
+      el.addEventListener('pointerdown', function(ev){ rowDown(ev, sec.id, el); });
       itemsEl.appendChild(el);
     });
 
@@ -694,36 +694,53 @@ function moveItemUp(secId, itemId) {
   const idx = sec.items.findIndex(i => i.id === itemId);
   if (idx > 0) { [sec.items[idx-1], sec.items[idx]] = [sec.items[idx], sec.items[idx-1]]; saveState(); render(); }
 }
-// ── Drag-to-reorder (pointer events, touch-friendly) ──
-let _drag = null;
-function dragStart(e, secId) {
-  e.preventDefault();
-  const item = e.target.closest('.item');
-  if (!item) return;
-  const container = item.parentElement;
-  _drag = { item, container, secId };
-  item.classList.add('dragging');
-  try { e.target.setPointerCapture(e.pointerId); } catch (x) {}
+// ── Drag-to-reorder: LONG-PRESS sulla riga (tieni premuto ~400ms) ──
+let _lp = null;          // { item, secId, pid, sx, sy, dragging, timer }
+let _suppressClick = false;
+const LP_MS = 400, LP_MOVE = 10;
+
+function rowDown(e, secId, item) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  _lp = { item, secId, pid: e.pointerId, sx: e.clientX, sy: e.clientY, dragging: false, timer: null };
+  _lp.timer = setTimeout(() => {
+    if (!_lp) return;
+    _lp.dragging = true;
+    item.classList.add('dragging');
+    if (navigator.vibrate) navigator.vibrate(25);
+    try { item.setPointerCapture(_lp.pid); } catch (x) {}
+  }, LP_MS);
 }
 document.addEventListener('pointermove', (e) => {
-  if (!_drag) return;
-  const { item, container } = _drag;
+  if (!_lp) return;
+  if (!_lp.dragging) {
+    if (Math.abs(e.clientX - _lp.sx) > LP_MOVE || Math.abs(e.clientY - _lp.sy) > LP_MOVE) {
+      clearTimeout(_lp.timer); _lp = null;   // si è mosso subito = scroll/tap, niente drag
+    }
+    return;
+  }
+  e.preventDefault();
+  const container = _lp.item.parentElement;
   const others = [...container.querySelectorAll('.item:not(.dragging)')];
   const after = others.find(s => { const r = s.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
-  if (after) container.insertBefore(item, after);
-  else container.appendChild(item);
-});
-function dragEnd() {
-  if (!_drag) return;
-  const { item, container, secId } = _drag;
-  item.classList.remove('dragging');
-  const order = [...container.querySelectorAll('.item')].map(el => el.dataset.itemId);
-  const sec = getSec(secId);
-  if (sec) { sec.items.sort((a, b) => order.indexOf(String(a.id)) - order.indexOf(String(b.id))); saveState(); }
-  _drag = null;
+  if (after) container.insertBefore(_lp.item, after);
+  else container.appendChild(_lp.item);
+}, { passive: false });
+function rowUp() {
+  if (!_lp) return;
+  clearTimeout(_lp.timer);
+  if (_lp.dragging) {
+    const container = _lp.item.parentElement, secId = _lp.secId;
+    _lp.item.classList.remove('dragging');
+    const order = [...container.querySelectorAll('.item')].map(el => el.dataset.itemId);
+    const sec = getSec(secId);
+    if (sec) { sec.items.sort((a, b) => order.indexOf(String(a.id)) - order.indexOf(String(b.id))); saveState(); }
+    _suppressClick = true; setTimeout(() => { _suppressClick = false; }, 60);
+  }
+  _lp = null;
 }
-document.addEventListener('pointerup', dragEnd);
-document.addEventListener('pointercancel', dragEnd);
+document.addEventListener('pointerup', rowUp);
+document.addEventListener('pointercancel', rowUp);
+document.addEventListener('click', (e) => { if (_suppressClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 
 function moveItemDown(secId, itemId) {
   const sec = getSec(secId); if (!sec) return;

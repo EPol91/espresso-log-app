@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v6';
+const CACHE_NAME = 'pol-in-one-v7';
 const ASSETS = [
   './',
   './index.html',
