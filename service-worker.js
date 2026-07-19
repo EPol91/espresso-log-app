@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v9';
+const CACHE_NAME = 'pol-in-one-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -52,5 +52,19 @@ self.addEventListener('fetch', (e) => {
   }
   e.respondWith(
     caches.match(req).then(cached => cached || fetch(req))
+  );
+});
+
+// Tap su una notifica → apre/porta in primo piano l'app (sul modulo giusto)
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const target = (e.notification.data && e.notification.data.url) || './index.html';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if ('focus' in w) { w.focus(); if ('navigate' in w) { try { w.navigate(target); } catch (x) {} } return; }
+      }
+      if (clients.openWindow) return clients.openWindow(target);
+    })
   );
 });

@@ -59,6 +59,14 @@
   .tile-arrow{ color:var(--muted); flex-shrink:0; }
   .tile.primary .tile-arrow{ color:var(--gold); }
   .tile-arrow svg{ width:20px; height:20px; }
+  .tile-ico{ position:relative; }
+  .tile-badge{
+    position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 5px;
+    background:var(--gold); color:#0d0d0d; border:2px solid #1a1a1a; border-radius:9px;
+    font-family:'Inter',sans-serif; font-size:11px; font-weight:600; line-height:14px; text-align:center;
+    display:none;
+  }
+  .tile.has-badge .tile-badge{ display:block; }
   .tile.soon{
     border-style:dashed; border-color:#2e2e2e; background:transparent;
   }
@@ -77,9 +85,10 @@
 
   <div class="tiles">
 
-    <a class="tile primary" href="tracking-peso/index.html">
+    <a class="tile primary" id="tile-peso" href="tracking-peso/index.html">
       <div class="tile-ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 12l3-3.2"/><path d="M8.5 12a3.5 3.5 0 0 1 7 0"/></svg>
+        <span class="tile-badge" id="badge-peso"></span>
       </div>
       <div class="tile-txt">
         <div class="tile-name">TRACKING PESO</div>
@@ -152,6 +161,31 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('service-worker.js').catch(function(){});
   });
 }
+
+// ===== Badge notifiche/promemoria sulle tessere + icona app =====
+function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function pesoPending(){
+  try{
+    var cfg=(JSON.parse(localStorage.getItem('pol_notif_v1'))||{}).peso;
+    if(!cfg||!cfg.enabled) return false;
+    var p=(cfg.time||'07:30').split(':'), due=new Date(); due.setHours(+p[0],+p[1],0,0);
+    if(new Date()<due) return false;
+    var data=JSON.parse(localStorage.getItem('ep_weight_tracker_v2_data'))||{};
+    var entries=data.entries||[], t=todayISO();
+    return !entries.some(function(e){return e.date===t;});
+  }catch(e){ return false; }
+}
+function refreshBadges(){
+  var count=0;
+  var peso=pesoPending();
+  var tile=document.getElementById('tile-peso'), badge=document.getElementById('badge-peso');
+  if(tile){ tile.classList.toggle('has-badge', peso); }
+  if(badge){ badge.textContent='1'; }
+  if(peso) count++;
+  try{ if(navigator.setAppBadge){ count?navigator.setAppBadge(count):(navigator.clearAppBadge&&navigator.clearAppBadge()); } }catch(e){}
+}
+refreshBadges();
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') refreshBadges(); });
 </script>
 </body>
 </html>

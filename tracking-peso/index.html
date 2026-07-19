@@ -169,6 +169,20 @@
   .pio-home{width:38px;height:38px;border-radius:10px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none}
   .pio-home:active{transform:scale(.92)}
   .pio-home svg{width:20px;height:20px}
+  /* Notifiche */
+  .notif-sec{margin-top:22px;padding-top:18px;border-top:1px solid #2a2a2a}
+  .notif-head{font-family:var(--serif);font-size:16px;color:var(--gold);margin-bottom:12px}
+  .notif-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .notif-lab{font-size:14px;color:#f0ede8}
+  .notif-sub{font-size:11px;color:#8f897b;margin-top:2px}
+  .notif-status{font-size:11px;color:#8f897b;margin-top:10px;line-height:1.5}
+  .notif-status.warn{color:var(--gold-soft)}
+  .switch{position:relative;display:inline-block;width:46px;height:27px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .track{position:absolute;inset:0;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:27px;transition:.2s;cursor:pointer}
+  .switch .track::before{content:'';position:absolute;height:19px;width:19px;left:3px;top:3px;background:#8f897b;border-radius:50%;transition:.2s}
+  .switch input:checked + .track{background:var(--gold);border-color:var(--gold)}
+  .switch input:checked + .track::before{transform:translateX(19px);background:#0d0d0d}
 
   /* ================= DARK VARIANT ================= */
   html,body{background:#0d0d0d}
@@ -453,6 +467,19 @@
     <div class="field"><label>Altezza (cm)</label><input id="p_height" type="number" inputmode="decimal" step="0.5" placeholder="es. 178"></div>
     <div class="field"><label>Peso obiettivo (kg)</label><input id="p_target" type="number" inputmode="decimal" step="0.1" placeholder="es. 88"></div>
     <div class="iohint">Il FFMI si attiva con altezza + una BF% (anche stimata).</div>
+
+    <div class="notif-sec">
+      <div class="notif-head">Notifiche e promemoria</div>
+      <div class="notif-row">
+        <div><div class="notif-lab">Promemoria log peso</div><div class="notif-sub">ogni giorno, all'orario scelto</div></div>
+        <label class="switch"><input type="checkbox" id="n_enabled" onchange="onNotifToggle()"><span class="track"></span></label>
+      </div>
+      <div class="field" id="n_timeWrap" style="display:none;margin-top:12px;">
+        <label>Orario promemoria</label>
+        <input id="n_time" type="time" value="07:30" onchange="saveNotif(true)">
+      </div>
+      <div class="notif-status" id="n_status"></div>
+    </div>
   </aside>
 
   <div id="toast"></div>
@@ -660,6 +687,7 @@ function saveEntry(){
   if(navigator.vibrate) navigator.vibrate([10,40,10]);
   save();document.getElementById('e_kg').value='';document.getElementById('e_bf').value='';document.getElementById('e_note').value='';document.getElementById('e_date').value=today();document.getElementById('saveBtn').textContent='Salva';syncDayBtns();
   render();
+  if(typeof clearPesoNotif==='function') clearPesoNotif();
 }
 function editEntry(date){var e=state.entries.filter(function(x){return x.date===date;})[0];if(!e)return;go('oggi');document.getElementById('e_date').value=e.date;document.getElementById('e_kg').value=e.kg;document.getElementById('e_bf').value=e.bf==null?'':e.bf;document.getElementById('e_note').value=e.note||'';document.getElementById('saveBtn').textContent='Aggiorna';document.getElementById('dbig').textContent=prettyDate(e.date);syncDayBtns();window.scrollTo({top:0,behavior:'smooth'});}
 function delEntry(date){if(!confirm('Eliminare la pesata del '+date+'?'))return;state.entries=state.entries.filter(function(e){return e.date!==date;});save();render();toast('Pesata eliminata');}
@@ -714,12 +742,95 @@ document.getElementById('e_note').addEventListener('input',syncDayBtns);
 document.getElementById('e_date').addEventListener('change',function(e){document.getElementById('dbig').textContent=prettyDate(e.target.value||today());});
 
 /* init */
+/* ===== Notifiche e promemoria ===== */
+var NKEY='pol_notif_v1';
+function getNotif(){try{return JSON.parse(localStorage.getItem(NKEY))||{};}catch(e){return {};}}
+function setNotif(o){try{localStorage.setItem(NKEY,JSON.stringify(o));}catch(e){}}
+function pesoCfg(){var o=getNotif();return o.peso||{enabled:false,time:'07:30'};}
+function pesoPending(){
+  var c=pesoCfg(); if(!c.enabled) return false;
+  var now=new Date(), p=(c.time||'07:30').split(':');
+  var due=new Date(); due.setHours(+p[0],+p[1],0,0);
+  if(now<due) return false;
+  return !state.entries.some(function(e){return e.date===today();});
+}
+function updateBadge(){
+  try{ var n=pesoPending()?1:0; if(navigator.setAppBadge){ n?navigator.setAppBadge(n):(navigator.clearAppBadge&&navigator.clearAppBadge()); } }catch(e){}
+}
+function loadNotifUI(){
+  var c=pesoCfg();
+  document.getElementById('n_enabled').checked=!!c.enabled;
+  document.getElementById('n_time').value=c.time||'07:30';
+  document.getElementById('n_timeWrap').style.display=c.enabled?'block':'none';
+  refreshNotifStatus();
+}
+function refreshNotifStatus(){
+  var el=document.getElementById('n_status'); if(!el)return;
+  var c=pesoCfg();
+  if(!c.enabled){ el.textContent=''; el.className='notif-status'; return; }
+  var perm=('Notification' in window)?Notification.permission:'unsupported';
+  if(perm==='granted'){
+    var trig=('Notification' in window)&&('showTrigger' in Notification.prototype);
+    el.innerHTML='Attivo alle <b>'+(c.time||'07:30')+'</b>. '+(trig?'Programmato anche ad app chiusa.':'Ad app chiusa il sistema potrebbe non avvisarti; vedrai badge e notifica alla riapertura.');
+    el.className='notif-status';
+  }else if(perm==='denied'){ el.textContent='Notifiche bloccate dal browser (sbloccale nelle impostazioni del sito). Il badge funziona comunque.'; el.className='notif-status warn'; }
+  else if(perm==='unsupported'){ el.textContent='Questo browser non supporta le notifiche. Resta il badge.'; el.className='notif-status warn'; }
+  else { el.textContent='Consenti le notifiche per riceverle.'; el.className='notif-status warn'; }
+}
+function onNotifToggle(){
+  var on=document.getElementById('n_enabled').checked;
+  document.getElementById('n_timeWrap').style.display=on?'block':'none';
+  if(on && 'Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission().then(function(){ saveNotif(true); });
+  }
+  saveNotif(true);
+}
+function saveNotif(reschedule){
+  var o=getNotif(), prev=o.peso||{};
+  o.peso={enabled:document.getElementById('n_enabled').checked, time:document.getElementById('n_time').value||'07:30', lastNotified:prev.lastNotified};
+  setNotif(o); refreshNotifStatus(); updateBadge();
+  if(reschedule) scheduleTriggers();
+}
+function scheduleTriggers(){
+  if(!('serviceWorker' in navigator)) return;
+  var c=pesoCfg();
+  navigator.serviceWorker.ready.then(function(reg){
+    if(!('showTrigger' in Notification.prototype)) return;
+    reg.getNotifications({tag:'peso-reminder',includeTriggered:true}).then(function(list){ list.forEach(function(n){n.close();}); });
+    if(!c.enabled || (('Notification' in window)&&Notification.permission!=='granted')) return;
+    var p=(c.time||'07:30').split(':');
+    for(var i=0;i<14;i++){
+      var d=new Date(); d.setDate(d.getDate()+i); d.setHours(+p[0],+p[1],0,0);
+      if(d.getTime()<=Date.now()) continue;
+      try{ reg.showNotification('Promemoria peso',{tag:'peso-reminder',body:'Registra il peso di oggi',showTrigger:new TimestampTrigger(d.getTime()),data:{url:'tracking-peso/index.html'},icon:'../icon-192.png',badge:'../icon-192.png'}); }catch(e){}
+    }
+  }).catch(function(){});
+}
+function fireReminderIfDue(){
+  updateBadge();
+  if(!pesoPending()) return;
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  var o=getNotif(), t=today();
+  if(o.peso && o.peso.lastNotified===t) return;
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.ready.then(function(reg){ reg.showNotification('Promemoria peso',{body:'Registra il peso di oggi',tag:'peso-now',data:{url:'tracking-peso/index.html'},icon:'../icon-192.png',badge:'../icon-192.png'}); }).catch(function(){});
+  }
+  o.peso=o.peso||{}; o.peso.lastNotified=t; setNotif(o);
+}
+function clearPesoNotif(){
+  updateBadge();
+  if('serviceWorker' in navigator){ navigator.serviceWorker.ready.then(function(reg){ reg.getNotifications({tag:'peso-now'}).then(function(l){l.forEach(function(n){n.close();});}); }).catch(function(){}); }
+}
+
 document.getElementById('e_date').value=today();
 syncTF();
 syncMA();
 render();
+loadNotifUI();
+fireReminderIfDue();
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ fireReminderIfDue(); scheduleTriggers(); } });
 var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(drawCharts,150);});
-window.addEventListener('load',drawCharts);
+window.addEventListener('load',function(){ drawCharts(); scheduleTriggers(); });
 </script>
 </body>
 </html>
