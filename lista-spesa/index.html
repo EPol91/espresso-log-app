@@ -129,7 +129,8 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .item.done .item-label { text-decoration: line-through; color: var(--text-dim); }
 .item.selected-item { background: rgba(212,175,55,0.06); }
 
-.item-row1 { display: flex; align-items: center; padding: 10px 10px 3px 12px; gap: 9px; }
+.item-row1 { display: flex; align-items: center; padding: 6px 10px 1px 12px; gap: 9px; }
+.item.dragging { opacity: .55; background: rgba(212,175,55,0.1); }
 .item-check {
   width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px;
   cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -146,7 +147,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .item-label-input { background: transparent; border: none; border-bottom: 1px solid var(--gold); outline: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; flex: 1; padding: 0; min-width: 0; }
 .item-qty-input { background: transparent; border: 1px solid var(--gold-border); border-radius: 4px; outline: none; color: var(--gold); font-family: 'Inter', sans-serif; font-size: 11px; padding: 2px 5px; width: 60px; text-align: center; }
 
-.item-row2 { display: flex; align-items: center; padding: 0 8px 6px 38px; gap: 2px; }
+.item-row2 { display: flex; align-items: center; padding: 0 8px 3px 38px; gap: 2px; }
 .item-note { flex: 1; font-size: 11px; color: var(--text-dim); font-style: italic; cursor: pointer; min-height: 14px; }
 .item-note.empty::before { content: '+ nota'; color: #444; font-style: normal; }
 .item-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 11px; font-style: italic; padding: 0; min-width: 0; }
@@ -154,7 +155,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 /* item action buttons */
 .btn-act {
   background: transparent; border: none; cursor: pointer; font-size: 15px;
-  min-width: 36px; min-height: 36px; padding: 4px 6px;
+  min-width: 32px; min-height: 30px; padding: 2px 5px;
   display: flex; align-items: center; justify-content: center; transition: all .15s;
   color: #555; line-height: 1; border-radius: 6px;
 }
@@ -164,7 +165,8 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .btn-act.cart { color: #555; }
 .btn-act.cart.on { color: var(--gold); background: var(--gold-dim); }
 .btn-act.del:active { color: var(--red); }
-.btn-act.move { font-size: 12px; color: #3a3a3a; min-width: 28px; }
+.btn-act.drag { font-size: 17px; color: #4a4a4a; cursor: grab; touch-action: none; }
+.btn-act.drag:active { cursor: grabbing; color: var(--gold); }
 
 /* add item */
 .add-item-row { display: flex; align-items: center; padding: 9px 10px; gap: 7px; border-top: 1px solid var(--border); }
@@ -463,8 +465,7 @@ function renderLista() {
           <span class="item-note${item.note ? '' : ' empty'}" onclick="editItemNote('${sec.id}','${item.id}')">${item.note ? escHtml(item.note) : ''}</span>
           <button class="btn-act star${item.fav ? ' on' : ''}" onclick="toggleFav('${sec.id}','${item.id}')" title="Preferito">⭐</button>
           <button class="btn-act cart${item.sel ? ' on' : ''}" onclick="toggleSel('${sec.id}','${item.id}')" title="Aggiungi alla spesa">🛒</button>
-          <button class="btn-act move" onclick="moveItemUp('${sec.id}','${item.id}')">▲</button>
-          <button class="btn-act move" onclick="moveItemDown('${sec.id}','${item.id}')">▼</button>
+          <button class="btn-act drag" onpointerdown="dragStart(event,'${sec.id}')" title="Trascina per riordinare">⠿</button>
           <button class="btn-act del" onclick="deleteItem('${sec.id}','${item.id}')">✕</button>
         </div>`;
       itemsEl.appendChild(el);
@@ -693,6 +694,37 @@ function moveItemUp(secId, itemId) {
   const idx = sec.items.findIndex(i => i.id === itemId);
   if (idx > 0) { [sec.items[idx-1], sec.items[idx]] = [sec.items[idx], sec.items[idx-1]]; saveState(); render(); }
 }
+// ── Drag-to-reorder (pointer events, touch-friendly) ──
+let _drag = null;
+function dragStart(e, secId) {
+  e.preventDefault();
+  const item = e.target.closest('.item');
+  if (!item) return;
+  const container = item.parentElement;
+  _drag = { item, container, secId };
+  item.classList.add('dragging');
+  try { e.target.setPointerCapture(e.pointerId); } catch (x) {}
+}
+document.addEventListener('pointermove', (e) => {
+  if (!_drag) return;
+  const { item, container } = _drag;
+  const others = [...container.querySelectorAll('.item:not(.dragging)')];
+  const after = others.find(s => { const r = s.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+  if (after) container.insertBefore(item, after);
+  else container.appendChild(item);
+});
+function dragEnd() {
+  if (!_drag) return;
+  const { item, container, secId } = _drag;
+  item.classList.remove('dragging');
+  const order = [...container.querySelectorAll('.item')].map(el => el.dataset.itemId);
+  const sec = getSec(secId);
+  if (sec) { sec.items.sort((a, b) => order.indexOf(String(a.id)) - order.indexOf(String(b.id))); saveState(); }
+  _drag = null;
+}
+document.addEventListener('pointerup', dragEnd);
+document.addEventListener('pointercancel', dragEnd);
+
 function moveItemDown(secId, itemId) {
   const sec = getSec(secId); if (!sec) return;
   const idx = sec.items.findIndex(i => i.id === itemId);

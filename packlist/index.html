@@ -98,6 +98,9 @@
   .btn-dn   { background: rgba(255,255,255,0.05); color: #777; }
   .btn-eye  { background: rgba(255,255,255,0.05); color: #777; }
   .btn-del  { background: rgba(191,30,45,0.15); color: var(--red); margin-left: auto; }
+  .btn-drag { background: rgba(212,175,55,0.12); color: var(--gold); cursor: grab; touch-action: none; }
+  .btn-drag:active { cursor: grabbing; opacity: 1; }
+  .item.dragging { opacity: .55; border-color: var(--gold-b); }
 
   .item.hidden .btn-eye { color: var(--gold); background: rgba(212,175,55,0.1); }
 
@@ -364,6 +367,7 @@ function render() {
     // Items
     var il = document.createElement('div');
     il.className = 'items';
+    il.dataset.si = si;
 
     // In filter mode use visibleItems (with original indices); normal mode use all
     var itemsToRender = filterActive ? visibleItems.map(function(item){
@@ -376,6 +380,7 @@ function render() {
 
       var row = document.createElement('div');
       row.className = 'item' + (item.d?' done':'') + (item.h?' hidden':'');
+      row.dataset.ii = ii;
 
       // Row 1: checkbox + label
       var top = document.createElement('div');
@@ -417,25 +422,13 @@ function render() {
       var btns = document.createElement('div');
       btns.className = 'item-btns';
 
-      var upb = document.createElement('button');
-      upb.className = 'ibtn btn-up';
-      upb.textContent = '▲ Su';
-      upb.disabled = (ii === 0);
-      (function(sIdx,iIdx){ upb.addEventListener('click', function(e){
-        e.stopPropagation();
-        var st2=load(); var a=st2[sIdx].items; var t=a[iIdx-1]; a[iIdx-1]=a[iIdx]; a[iIdx]=t; save(st2); render();
-      }); })(si,ii);
-      btns.appendChild(upb);
-
-      var dnb = document.createElement('button');
-      dnb.className = 'ibtn btn-dn';
-      dnb.textContent = '▼ Giù';
-      dnb.disabled = (ii === sec.items.length-1);
-      (function(sIdx,iIdx){ dnb.addEventListener('click', function(e){
-        e.stopPropagation();
-        var st2=load(); var a=st2[sIdx].items; var t=a[iIdx+1]; a[iIdx+1]=a[iIdx]; a[iIdx]=t; save(st2); render();
-      }); })(si,ii);
-      btns.appendChild(dnb);
+      if (!filterActive) {
+        var drb = document.createElement('button');
+        drb.className = 'ibtn btn-drag';
+        drb.textContent = '⠿ Trascina';
+        drb.addEventListener('pointerdown', function(e){ pkDragStart(e); });
+        btns.appendChild(drb);
+      }
 
       var eyeb = document.createElement('button');
       eyeb.className = 'ibtn btn-eye';
@@ -507,6 +500,37 @@ document.getElementById('addSecBtn').addEventListener('click', function(){
 document.getElementById('resetBtn').addEventListener('click', function(){
   var st=load(); st.forEach(function(s){s.items.forEach(function(i){i.d=0;})}); save(st); render();
 });
+
+// ── Drag-to-reorder (pointer events, touch-friendly) ──
+var _pk=null;
+function pkDragStart(e){
+  e.preventDefault();
+  var item=e.target.closest('.item'); if(!item)return;
+  _pk={item:item, container:item.parentElement};
+  item.classList.add('dragging');
+  try{e.target.setPointerCapture(e.pointerId);}catch(x){}
+}
+document.addEventListener('pointermove', function(e){
+  if(!_pk)return;
+  var item=_pk.item, container=_pk.container;
+  var others=[].slice.call(container.querySelectorAll('.item:not(.dragging)'));
+  var after=null;
+  for(var k=0;k<others.length;k++){var r=others[k].getBoundingClientRect(); if(e.clientY<r.top+r.height/2){after=others[k];break;}}
+  if(after)container.insertBefore(item,after); else container.appendChild(item);
+});
+function pkDragEnd(){
+  if(!_pk)return;
+  var container=_pk.container;
+  _pk.item.classList.remove('dragging');
+  var si=+container.dataset.si;
+  var order=[].slice.call(container.querySelectorAll('.item')).map(function(el){return +el.dataset.ii;});
+  var st=load(); var old=st[si].items.slice();
+  st[si].items=order.map(function(oi){return old[oi];});
+  save(st); render();
+  _pk=null;
+}
+document.addEventListener('pointerup', pkDragEnd);
+document.addEventListener('pointercancel', pkDragEnd);
 
 document.getElementById('copyBtn').addEventListener('click', function(){
   var st=load();
