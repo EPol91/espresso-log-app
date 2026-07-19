@@ -467,7 +467,8 @@ function renderLista() {
           <button class="btn-act cart${item.sel ? ' on' : ''}" onclick="toggleSel('${sec.id}','${item.id}')" title="Aggiungi alla spesa">🛒</button>
           <button class="btn-act del" onclick="deleteItem('${sec.id}','${item.id}')">✕</button>
         </div>`;
-      el.addEventListener('pointerdown', function(ev){ rowDown(ev, sec.id, el); });
+      el.addEventListener('touchstart', function(ev){ var t=ev.touches[0]; pressStart(t.clientX, t.clientY, sec.id, el, true); }, {passive:true});
+      el.addEventListener('mousedown', function(ev){ if(ev.button!==0) return; pressStart(ev.clientX, ev.clientY, sec.id, el, false); });
       itemsEl.appendChild(el);
     });
 
@@ -695,37 +696,34 @@ function moveItemUp(secId, itemId) {
   if (idx > 0) { [sec.items[idx-1], sec.items[idx]] = [sec.items[idx], sec.items[idx-1]]; saveState(); render(); }
 }
 // ── Drag-to-reorder: LONG-PRESS sulla riga (tieni premuto ~400ms) ──
-let _lp = null;          // { item, secId, pid, sx, sy, dragging, timer }
+// Touch events (non-passive touchmove) per bloccare lo scroll in modo affidabile.
+let _lp = null;
 let _suppressClick = false;
-const LP_MS = 400, LP_MOVE = 10;
+const LP_MS = 400, LP_MOVE = 12;
 
-function rowDown(e, secId, item) {
-  if (e.pointerType === 'mouse' && e.button !== 0) return;
-  _lp = { item, secId, pid: e.pointerId, sx: e.clientX, sy: e.clientY, dragging: false, timer: null };
+function pressStart(x, y, secId, item, isTouch) {
+  _lp = { item, secId, sx: x, sy: y, dragging: false, isTouch, timer: null };
   _lp.timer = setTimeout(() => {
     if (!_lp) return;
     _lp.dragging = true;
     item.classList.add('dragging');
     if (navigator.vibrate) navigator.vibrate(25);
-    try { item.setPointerCapture(_lp.pid); } catch (x) {}
   }, LP_MS);
 }
-document.addEventListener('pointermove', (e) => {
+function pressMove(x, y, e) {
   if (!_lp) return;
   if (!_lp.dragging) {
-    if (Math.abs(e.clientX - _lp.sx) > LP_MOVE || Math.abs(e.clientY - _lp.sy) > LP_MOVE) {
-      clearTimeout(_lp.timer); _lp = null;   // si è mosso subito = scroll/tap, niente drag
-    }
+    if (Math.abs(x - _lp.sx) > LP_MOVE || Math.abs(y - _lp.sy) > LP_MOVE) { clearTimeout(_lp.timer); _lp = null; }
     return;
   }
-  e.preventDefault();
+  if (e && e.cancelable) e.preventDefault();   // ferma lo scroll durante il drag
   const container = _lp.item.parentElement;
   const others = [...container.querySelectorAll('.item:not(.dragging)')];
-  const after = others.find(s => { const r = s.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+  const after = others.find(s => { const r = s.getBoundingClientRect(); return y < r.top + r.height / 2; });
   if (after) container.insertBefore(_lp.item, after);
   else container.appendChild(_lp.item);
-}, { passive: false });
-function rowUp() {
+}
+function pressEnd() {
   if (!_lp) return;
   clearTimeout(_lp.timer);
   if (_lp.dragging) {
@@ -734,12 +732,15 @@ function rowUp() {
     const order = [...container.querySelectorAll('.item')].map(el => el.dataset.itemId);
     const sec = getSec(secId);
     if (sec) { sec.items.sort((a, b) => order.indexOf(String(a.id)) - order.indexOf(String(b.id))); saveState(); }
-    _suppressClick = true; setTimeout(() => { _suppressClick = false; }, 60);
+    _suppressClick = true; setTimeout(() => { _suppressClick = false; }, 80);
   }
   _lp = null;
 }
-document.addEventListener('pointerup', rowUp);
-document.addEventListener('pointercancel', rowUp);
+document.addEventListener('touchmove', (e) => { if (_lp && _lp.isTouch) { const t = e.touches[0]; pressMove(t.clientX, t.clientY, e); } }, { passive: false });
+document.addEventListener('touchend', () => { if (_lp && _lp.isTouch) pressEnd(); });
+document.addEventListener('touchcancel', () => { if (_lp && _lp.isTouch) pressEnd(); });
+document.addEventListener('mousemove', (e) => { if (_lp && !_lp.isTouch) pressMove(e.clientX, e.clientY, e); });
+document.addEventListener('mouseup', () => { if (_lp && !_lp.isTouch) pressEnd(); });
 document.addEventListener('click', (e) => { if (_suppressClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 
 function moveItemDown(secId, itemId) {

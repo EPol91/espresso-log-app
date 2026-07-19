@@ -442,7 +442,10 @@ function render() {
       btns.appendChild(xb);
 
       row.appendChild(btns);
-      if (!filterActive) { (function(rw){ rw.addEventListener('pointerdown', function(e){ pkRowDown(e, rw); }); })(row); }
+      if (!filterActive) { (function(rw){
+        rw.addEventListener('touchstart', function(e){ var t=e.touches[0]; pkPressStart(t.clientX,t.clientY,rw,true); }, {passive:true});
+        rw.addEventListener('mousedown', function(e){ if(e.button!==0)return; pkPressStart(e.clientX,e.clientY,rw,false); });
+      })(row); }
       il.appendChild(row);
     });
 
@@ -496,33 +499,32 @@ document.getElementById('resetBtn').addEventListener('click', function(){
 });
 
 // ── Drag-to-reorder: LONG-PRESS sulla riga (tieni premuto ~400ms) ──
+// Touch events (touchmove non-passive) per bloccare lo scroll durante il drag.
 var _pk=null; var _pkSuppress=false;
-var PK_MS=400, PK_MOVE=10;
-function pkRowDown(e, row){
-  if(e.pointerType==='mouse' && e.button!==0) return;
-  _pk={item:row, container:row.parentElement, pid:e.pointerId, sx:e.clientX, sy:e.clientY, dragging:false, timer:null};
+var PK_MS=400, PK_MOVE=12;
+function pkPressStart(x,y,row,isTouch){
+  _pk={item:row, container:row.parentElement, sx:x, sy:y, dragging:false, isTouch:isTouch, timer:null};
   _pk.timer=setTimeout(function(){
     if(!_pk)return;
     _pk.dragging=true;
     row.classList.add('dragging');
     if(navigator.vibrate) navigator.vibrate(25);
-    try{row.setPointerCapture(_pk.pid);}catch(x){}
   }, PK_MS);
 }
-document.addEventListener('pointermove', function(e){
+function pkPressMove(x,y,e){
   if(!_pk)return;
   if(!_pk.dragging){
-    if(Math.abs(e.clientX-_pk.sx)>PK_MOVE||Math.abs(e.clientY-_pk.sy)>PK_MOVE){ clearTimeout(_pk.timer); _pk=null; }
+    if(Math.abs(x-_pk.sx)>PK_MOVE||Math.abs(y-_pk.sy)>PK_MOVE){ clearTimeout(_pk.timer); _pk=null; }
     return;
   }
-  e.preventDefault();
+  if(e&&e.cancelable)e.preventDefault();
   var item=_pk.item, container=_pk.container;
   var others=[].slice.call(container.querySelectorAll('.item:not(.dragging)'));
   var after=null;
-  for(var k=0;k<others.length;k++){var r=others[k].getBoundingClientRect(); if(e.clientY<r.top+r.height/2){after=others[k];break;}}
+  for(var k=0;k<others.length;k++){var r=others[k].getBoundingClientRect(); if(y<r.top+r.height/2){after=others[k];break;}}
   if(after)container.insertBefore(item,after); else container.appendChild(item);
-}, {passive:false});
-function pkRowUp(){
+}
+function pkPressEnd(){
   if(!_pk)return;
   clearTimeout(_pk.timer);
   if(_pk.dragging){
@@ -533,12 +535,15 @@ function pkRowUp(){
     var st=load(); var old=st[si].items.slice();
     st[si].items=order.map(function(oi){return old[oi];});
     save(st); render();
-    _pkSuppress=true; setTimeout(function(){_pkSuppress=false;},60);
+    _pkSuppress=true; setTimeout(function(){_pkSuppress=false;},80);
   }
   _pk=null;
 }
-document.addEventListener('pointerup', pkRowUp);
-document.addEventListener('pointercancel', pkRowUp);
+document.addEventListener('touchmove', function(e){ if(_pk&&_pk.isTouch){ var t=e.touches[0]; pkPressMove(t.clientX,t.clientY,e); } }, {passive:false});
+document.addEventListener('touchend', function(){ if(_pk&&_pk.isTouch) pkPressEnd(); });
+document.addEventListener('touchcancel', function(){ if(_pk&&_pk.isTouch) pkPressEnd(); });
+document.addEventListener('mousemove', function(e){ if(_pk&&!_pk.isTouch) pkPressMove(e.clientX,e.clientY,e); });
+document.addEventListener('mouseup', function(){ if(_pk&&!_pk.isTouch) pkPressEnd(); });
 document.addEventListener('click', function(e){ if(_pkSuppress){ e.preventDefault(); e.stopPropagation(); } }, true);
 
 document.getElementById('copyBtn').addEventListener('click', function(){
