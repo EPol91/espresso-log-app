@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Crema di riso — calcolo acqua</title>
+<style>
+  :root{
+    --bg:#0d0d0d; --card:#1a1a1a; --line:#2a2a2a; --txt:#f0ede8;
+    --mut:#888; --gold:#C9A84C; --hot:#ff7a45; --cold:#3fb6ff; --ok:#C9A84C; --warn:#ffcf4d;
+  }
+  .pio-home{width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none}
+  .pio-home:active{transform:scale(0.92)}
+  .pio-home svg{width:20px;height:20px}
+  .pio-topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .pio-topbar .pio-name{font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--gold)}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:20px 16px 40px;line-height:1.4}
+  .wrap{max-width:460px;margin:0 auto}
+  h1{font-size:19px;font-weight:700;margin:0 0 2px}
+  .sub{color:var(--mut);font-size:13px;margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  label{display:block;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+  select,input{width:100%;background:#0e1116;border:1px solid var(--line);color:var(--txt);
+    font-size:17px;padding:12px 14px;border-radius:10px;outline:none}
+  select:focus,input:focus{border-color:var(--gold)}
+  .row{display:flex;gap:10px}
+  .row>div{flex:1}
+  .seg{display:flex;gap:8px;margin-top:4px}
+  .seg button{flex:1;background:#0e1116;border:1px solid var(--line);color:var(--mut);
+    font-size:15px;font-weight:600;padding:12px;border-radius:10px;cursor:pointer}
+  .seg button.on-hot{border-color:var(--hot);color:var(--hot);background:rgba(255,122,69,.08)}
+  .seg button.on-cold{border-color:var(--cold);color:var(--cold);background:rgba(63,182,255,.08)}
+  .mt{margin-top:14px}
+  .res{text-align:center;padding:6px 0}
+  .big{font-size:44px;font-weight:800;letter-spacing:-1px}
+  .big span{font-size:20px;color:var(--mut);font-weight:600}
+  .reslbl{color:var(--mut);font-size:13px;margin-bottom:2px}
+  .grid{display:flex;gap:10px;margin-top:16px}
+  .grid .cell{flex:1;background:#0e1116;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+  .cell .v{font-size:22px;font-weight:700}
+  .cell .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+  .method{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;
+    padding:7px 12px;border-radius:20px;margin-top:14px}
+  .m-hot{background:rgba(255,122,69,.12);color:var(--hot)}
+  .m-cold{background:rgba(63,182,255,.12);color:var(--cold)}
+  .warn{background:rgba(255,207,77,.1);border:1px solid rgba(255,207,77,.35);color:var(--warn);
+    font-size:13px;padding:10px 12px;border-radius:10px;margin-top:14px}
+  .ratio-tag{color:var(--mut);font-size:13px;margin-top:10px}
+  .tabs{display:flex;gap:8px;margin-bottom:18px}
+  .tab{flex:1;background:var(--card);border:1px solid var(--line);color:var(--mut);
+    font-size:15px;font-weight:600;padding:12px;border-radius:10px;cursor:pointer}
+  .tab.on{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pio-topbar">
+    <a href="../index.html" class="pio-home" aria-label="Torna alla home POL-IN-ONE">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    </a>
+    <span class="pio-name">RICE &amp; COR</span>
+  </div>
+  <div class="tabs">
+    <button id="tabCrema" class="tab on" onclick="showTab('crema')">Crema di riso</button>
+    <button id="tabRiso" class="tab" onclick="showTab('riso')">Riso</button>
+  </div>
+
+  <div id="panelCrema">
+  <h1>Crema di riso</h1>
+  <p class="sub">Acqua e metodo per porzione, in base alla farina.</p>
+
+  <div class="card">
+    <label>Farina</label>
+    <select id="flour"></select>
+    <div class="ratio-tag" id="ratioTag"></div>
+
+    <div class="mt">
+      <label>Metodo</label>
+      <div class="seg">
+        <button id="btnHot" onclick="setMethod('hot')">🔥 Calda</button>
+        <button id="btnCold" onclick="setMethod('cold')">❄️ Fredda</button>
+      </div>
+    </div>
+
+    <div class="row mt">
+      <div>
+        <label>Polvere / porzione (g)</label>
+        <input id="grams" type="number" inputmode="decimal" min="0" step="1" placeholder="85">
+      </div>
+      <div>
+        <label>Porzioni</label>
+        <input id="serv" type="number" inputmode="numeric" min="1" step="1" placeholder="4">
+      </div>
+    </div>
+    <div class="mt">
+      <label>Peso pentola vuota (g)</label>
+      <input id="pot" type="number" inputmode="decimal" min="0" step="1" placeholder="si ricorda">
+    </div>
+    <div class="mt">
+      <label>Peso a cotto — pentola inclusa (g)</label>
+      <input id="cooked" type="number" inputmode="decimal" min="0" step="1" placeholder="pesa dopo cottura">
+    </div>
+    <div id="warnBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="res">
+      <div class="reslbl">Acqua per porzione</div>
+      <div class="big" id="waterServ">–</div>
+    </div>
+    <div id="methodBadge" style="text-align:center"></div>
+    <div class="grid">
+      <div class="cell"><div class="v" id="totPowder">–</div><div class="k">Polvere tot.</div></div>
+      <div class="cell"><div class="v" id="totWater">–</div><div class="k">Acqua tot.</div></div>
+    </div>
+    <div class="grid" id="cookedRow" style="display:none">
+      <div class="cell" style="border-color:var(--ok)"><div class="v" id="cookedServ" style="color:var(--ok)">–</div><div class="k">Cotto / porzione</div></div>
+    </div>
+    <p id="cookedNote" style="display:none;color:var(--mut);font-size:12px;margin:12px 2px 0;line-height:1.5">
+      Porziona subito, anche da caldo: il vapore si disperde equamente in tutti i tupperware, quindi il peso finale a freddo resta uguale in ognuno.
+    </p>
+  </div>
+  </div>
+
+  <div id="panelRiso" style="display:none">
+  <h1>Riso</h1>
+  <p class="sub">Meal prep: cuoci in massa, poi porziona con il ratio.</p>
+
+  <div class="card">
+    <label>Tipo di riso</label>
+    <select id="rType"></select>
+    <div class="mt">
+      <label>Crudo totale (g)</label>
+      <input id="rRawTotIn" type="number" inputmode="decimal" min="0" step="1" placeholder="es. 500">
+    </div>
+    <div class="mt">
+      <label>Peso bacinella vuota (g)</label>
+      <input id="rBowl" type="number" inputmode="decimal" min="0" step="1" placeholder="si ricorda">
+    </div>
+    <div class="mt">
+      <label>Peso a cotto — bacinella inclusa (g)</label>
+      <input id="rCooked" type="number" inputmode="decimal" min="0" step="1" placeholder="pesa a fine cottura">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="cell"><div class="v" id="rWater">–</div><div class="k">Acqua cottura</div></div>
+      <div class="cell"><div class="v" id="rNet">–</div><div class="k">Cotto netto</div></div>
+      <div class="cell" style="border-color:var(--ok)"><div class="v" id="rR2" style="color:var(--ok)">–</div><div class="k">Ratio cotto÷crudo</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>Porzionatura — crudo / porzione (g)</label>
+    <input id="rRawServ" type="number" inputmode="decimal" min="0" step="1" placeholder="es. 100">
+    <div class="res mt">
+      <div class="reslbl">Cotto da mettere nel tupperware</div>
+      <div class="big" id="rTupp">–</div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+const FLOURS = {
+  tbjp:        {name:"TBJP",                 ratio:4.5, type:"raw",    def:"hot"},
+  normale:     {name:"Farina di riso normale",ratio:5,   type:"raw",    def:"hot"},
+  prozis_inst: {name:"Prozis istantanea",     ratio:4,   type:"instant",def:"cold"},
+  prozis_raw:  {name:"Prozis farina cruda",   ratio:5,   type:"raw",    def:"hot"},
+  vast:        {name:"Vast",                  ratio:3.5, type:"instant",def:"cold"}
+};
+
+const $ = id => document.getElementById(id);
+let method = "hot";
+
+// popola select
+const sel = $("flour");
+Object.entries(FLOURS).forEach(([k,f])=>{
+  const o=document.createElement("option"); o.value=k; o.textContent=f.name; sel.appendChild(o);
+});
+
+function load(){
+  const s = JSON.parse(localStorage.getItem("crc_last")||"{}");
+  if(s.flour && FLOURS[s.flour]) sel.value=s.flour;
+  if(s.grams!=null) $("grams").value=s.grams;
+  if(s.serv!=null) $("serv").value=s.serv;
+  if(s.cooked!=null) $("cooked").value=s.cooked;
+  if(s.pot!=null) $("pot").value=s.pot;
+  onFlourChange(s.method); // usa metodo salvato se presente
+}
+function save(){
+  localStorage.setItem("crc_last", JSON.stringify({
+    flour:sel.value, grams:$("grams").value, serv:$("serv").value, cooked:$("cooked").value, pot:$("pot").value, method
+  }));
+}
+
+function onFlourChange(forceMethod){
+  const f=FLOURS[sel.value];
+  $("ratioTag").textContent = `Rapporto 1:${f.ratio} · ${f.type==="raw"?"cruda (da cuocere)":"gelatinizzata (istantanea)"}`;
+  method = forceMethod || f.def;
+  paintMethod();
+  calc();
+}
+function setMethod(m){ method=m; paintMethod(); calc(); save(); }
+function paintMethod(){
+  $("btnHot").className = method==="hot" ? "on-hot":"";
+  $("btnCold").className = method==="cold" ? "on-cold":"";
+}
+
+function calc(){
+  const f=FLOURS[sel.value];
+  const g=parseFloat($("grams").value);
+  const n=parseInt($("serv").value);
+
+  // avviso: freddo su farina cruda
+  const bad = (method==="cold" && f.type==="raw");
+  $("warnBox").innerHTML = bad
+    ? `<div class="warn">⚠️ ${f.name} è cruda: a freddo l'amido non gelatinizza, si scioglie e non si addensa. Serve acqua calda.</div>`
+    : "";
+
+  const cooked=parseFloat($("cooked").value);
+  const pot=parseFloat($("pot").value)||0;
+
+  if(!(g>0) || !(n>0)){
+    $("waterServ").textContent="–";
+    $("totPowder").textContent=$("totWater").textContent="–";
+    $("methodBadge").innerHTML="";
+    $("cookedRow").style.display="none";
+    return;
+  }
+
+  const fmt = x => (Number.isInteger(x)? x : parseFloat(x.toFixed(2)));
+  const wServ = g*f.ratio;
+  const totP = g*n;
+  const totW = wServ*n;
+
+  $("waterServ").innerHTML = fmt(wServ)+' <span>ml</span>';
+  $("totPowder").textContent = fmt(totP)+" g";
+  $("totWater").textContent = fmt(totW)+" ml";
+
+  // porzionamento diretto sul peso a cotto
+  // cotto netto = cotto − pentola vuota; poi diviso porzioni
+  const cookedNet = cooked - pot;
+  if(cookedNet>0){
+    $("cookedRow").style.display="flex";
+    $("cookedNote").style.display="block";
+    $("cookedServ").textContent = fmt(cookedNet/n)+" g";
+  } else { $("cookedRow").style.display="none"; $("cookedNote").style.display="none"; }
+
+  $("methodBadge").innerHTML = method==="hot"
+    ? `<span class="method m-hot">🔥 Cuocere — bollore + 2-3 min</span>`
+    : `<span class="method m-cold">❄️ Acqua fredda — mescolare, riposo in frigo</span>`;
+}
+
+sel.addEventListener("change", ()=>{ onFlourChange(); save(); });
+$("grams").addEventListener("input", ()=>{ calc(); save(); });
+$("serv").addEventListener("input", ()=>{ calc(); save(); });
+$("cooked").addEventListener("input", ()=>{ calc(); save(); });
+$("pot").addEventListener("input", ()=>{ calc(); save(); });
+function showTab(t){
+  const c = t==="crema";
+  $("panelCrema").style.display = c?"block":"none";
+  $("panelRiso").style.display = c?"none":"block";
+  $("tabCrema").className = "tab"+(c?" on":"");
+  $("tabRiso").className = "tab"+(c?"":" on");
+  localStorage.setItem("crc_tab", t);
+}
+
+const RICE = { basmati:1.5, jasmine:1.3, parboiled:2 };
+const rSel=$("rType");
+[["basmati","Basmati"],["jasmine","Jasmine"],["parboiled","Parboiled"]]
+  .forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;rSel.appendChild(o);});
+rSel.addEventListener("change", ()=>{ calcRiso(); saveRiso(); });
+
+function calcRiso(){
+  const fmt = x => (Number.isInteger(x)? x : parseFloat(x.toFixed(2)));
+  const wr = RICE[rSel.value];            // ratio acqua cottura
+  const rawTot=parseFloat($("rRawTotIn").value);
+  const bowl=parseFloat($("rBowl").value)||0;
+  const cooked=parseFloat($("rCooked").value);
+  const rawServ=parseFloat($("rRawServ").value);
+
+  const net = cooked - bowl;              // cotto netto
+  const r2 = (net>0 && rawTot>0) ? net/rawTot : 0;   // ratio cotto/crudo
+
+  $("rWater").textContent = rawTot>0 ? fmt(rawTot*wr)+" ml" : "–";
+  $("rNet").textContent   = net>0 ? fmt(net)+" g" : "–";
+  $("rR2").textContent    = r2>0 ? fmt(r2) : "–";
+  $("rTupp").innerHTML    = (r2>0 && rawServ>0) ? fmt(rawServ*r2)+' <span>g</span>' : "–";
+}
+
+function loadRiso(){
+  const s = JSON.parse(localStorage.getItem("crc_riso")||"{}");
+  if(s.type!=null) $("rType").value=s.type;
+  if(s.rawTot!=null) $("rRawTotIn").value=s.rawTot;
+  if(s.bowl!=null) $("rBowl").value=s.bowl;
+  if(s.cooked!=null) $("rCooked").value=s.cooked;
+  if(s.rawServ!=null) $("rRawServ").value=s.rawServ;
+  calcRiso();
+}
+function saveRiso(){
+  localStorage.setItem("crc_riso", JSON.stringify({
+    type:$("rType").value, rawTot:$("rRawTotIn").value, bowl:$("rBowl").value, cooked:$("rCooked").value, rawServ:$("rRawServ").value
+  }));
+}
+["rRawTotIn","rBowl","rCooked","rRawServ"].forEach(id=>
+  $(id).addEventListener("input", ()=>{ calcRiso(); saveRiso(); }));
+
+load();
+loadRiso();
+showTab(localStorage.getItem("crc_tab")||"crema");
+</script>
+</body>
+</html>

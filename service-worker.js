@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v1';
+const CACHE_NAME = 'pol-in-one-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png',
+  './rice-cor/index.html',
   './polspresso/index.html',
   './lista-spesa/index.html',
   './packlist/index.html',
