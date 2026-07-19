@@ -11,9 +11,9 @@
   --surface: #1a1a1a;
   --surface2: #222222;
   --border: rgba(255,255,255,0.08);
-  --gold: #C9A84C;
-  --gold-dim: rgba(201,168,76,0.12);
-  --gold-border: rgba(201,168,76,0.3);
+  --gold: #D4AF37;
+  --gold-dim: rgba(212,175,55,0.12);
+  --gold-border: rgba(212,175,55,0.3);
   --text: #f0ede8;
   --text-dim: #888;
   --red: #c0392b;
@@ -26,13 +26,13 @@ html, body { height: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   min-height: 100vh;
   padding: 0;
 }
 
 /* ── HOME BUTTON (POL-IN-ONE) ── */
-.pio-home{width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.pio-home{width:38px;height:38px;border-radius:10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
 .pio-home:active{transform:scale(0.92);}
 .pio-home svg{width:20px;height:20px;}
 
@@ -44,7 +44,7 @@ header {
   position: sticky; top: 0; z-index: 100;
 }
 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.title-block h1 { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 2px; line-height: 1; }
+.title-block h1 { font-family: 'Playfair Display', sans-serif; font-size: 30px; letter-spacing: 2px; line-height: 1; }
 .title-block h1 span { color: var(--gold); }
 .subtitle { font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
 .header-actions { display: flex; gap: 8px; }
@@ -72,7 +72,7 @@ header {
 .tab-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; background: transparent; border: none; cursor: pointer;
-  color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 10px;
+  color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 10px;
   letter-spacing: .5px; text-transform: uppercase; transition: color .15s; position: relative;
   -webkit-tap-highlight-color: transparent;
 }
@@ -103,12 +103,12 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .section-icon { font-size: 17px; width: 26px; text-align: center; flex-shrink: 0; cursor: pointer; }
 .section-title-wrap { flex: 1; min-width: 0; }
 .section-title {
-  font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  font-family: 'Playfair Display', sans-serif; font-size: 15px; letter-spacing: 1.5px;
   color: var(--gold); cursor: pointer; display: block;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .section-title-input {
-  font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  font-family: 'Playfair Display', sans-serif; font-size: 15px; letter-spacing: 1.5px;
   color: var(--gold); background: transparent; border: none;
   border-bottom: 1px solid var(--gold); outline: none; width: 100%; padding: 0;
 }
@@ -127,7 +127,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 .item { border-bottom: 1px solid var(--border); transition: background .15s; }
 .item:last-child { border-bottom: none; }
 .item.done .item-label { text-decoration: line-through; color: var(--text-dim); }
-.item.selected-item { background: rgba(201,168,76,0.06); }
+.item.selected-item { background: rgba(212,175,55,0.06); }
 
 .item-row1 { display: flex; align-items: center; padding: 10px 10px 3px 12px; gap: 9px; }
 .item-check {
@@ -143,13 +143,13 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
   white-space: nowrap; flex-shrink: 0; cursor: pointer;
 }
 .item-qty.empty { opacity: .35; font-size: 10px; }
-.item-label-input { background: transparent; border: none; border-bottom: 1px solid var(--gold); outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; flex: 1; padding: 0; min-width: 0; }
-.item-qty-input { background: transparent; border: 1px solid var(--gold-border); border-radius: 4px; outline: none; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 2px 5px; width: 60px; text-align: center; }
+.item-label-input { background: transparent; border: none; border-bottom: 1px solid var(--gold); outline: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; flex: 1; padding: 0; min-width: 0; }
+.item-qty-input { background: transparent; border: 1px solid var(--gold-border); border-radius: 4px; outline: none; color: var(--gold); font-family: 'Inter', sans-serif; font-size: 11px; padding: 2px 5px; width: 60px; text-align: center; }
 
 .item-row2 { display: flex; align-items: center; padding: 0 8px 6px 38px; gap: 2px; }
 .item-note { flex: 1; font-size: 11px; color: var(--text-dim); font-style: italic; cursor: pointer; min-height: 14px; }
 .item-note.empty::before { content: '+ nota'; color: #444; font-style: normal; }
-.item-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 11px; font-style: italic; padding: 0; min-width: 0; }
+.item-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 11px; font-style: italic; padding: 0; min-width: 0; }
 
 /* item action buttons */
 .btn-act {
@@ -160,7 +160,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 }
 .btn-act:active { transform: scale(.82); background: rgba(255,255,255,0.05); }
 .btn-act.star { color: #444; font-size: 16px; }
-.btn-act.star.on { color: #C9A84C; background: rgba(201,168,76,0.18); border-radius: 6px; text-shadow: 0 0 8px rgba(201,168,76,0.6); }
+.btn-act.star.on { color: #D4AF37; background: rgba(212,175,55,0.18); border-radius: 6px; text-shadow: 0 0 8px rgba(212,175,55,0.6); }
 .btn-act.cart { color: #555; }
 .btn-act.cart.on { color: var(--gold); background: var(--gold-dim); }
 .btn-act.del:active { color: var(--red); }
@@ -168,21 +168,21 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 
 /* add item */
 .add-item-row { display: flex; align-items: center; padding: 9px 10px; gap: 7px; border-top: 1px solid var(--border); }
-.add-item-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 3px 0; }
+.add-item-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; padding: 3px 0; }
 .add-item-input::placeholder { color: #3a3a3a; }
-.add-qty-input { background: transparent; border: 1px solid var(--border); border-radius: 5px; outline: none; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 4px 6px; width: 56px; text-align: center; }
+.add-qty-input { background: transparent; border: 1px solid var(--border); border-radius: 5px; outline: none; color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 11px; padding: 4px 6px; width: 56px; text-align: center; }
 .add-qty-input::placeholder { color: #3a3a3a; font-size: 10px; }
 .btn-add { background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 7px; color: var(--gold); cursor: pointer; font-size: 20px; height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
 .btn-add:active { background: var(--gold); color: #111; transform: scale(.9); }
 
 /* ── ADD SECTION / FOOTER ── */
 .add-section-wrap { padding: 0 16px 12px; }
-.btn-add-section { background: transparent; border: 1px dashed rgba(201,168,76,0.25); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px; width: 100%; transition: all .2s; }
+.btn-add-section { background: transparent; border: 1px dashed rgba(212,175,55,0.25); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; padding: 10px; width: 100%; transition: all .2s; }
 .btn-add-section:active { border-color: var(--gold); color: var(--gold); }
 .footer-actions { display: flex; justify-content: center; gap: 10px; padding: 4px 16px 12px; flex-wrap: wrap; }
-.btn-secondary { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 12px; }
+.btn-secondary { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; padding: 6px 12px; }
 .btn-secondary:active { border-color: var(--text-dim); color: var(--text); }
-.btn-danger { background: transparent; border: 1px solid rgba(192,57,43,0.3); border-radius: 8px; color: rgba(192,57,43,0.7); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 12px; }
+.btn-danger { background: transparent; border: 1px solid rgba(192,57,43,0.3); border-radius: 8px; color: rgba(192,57,43,0.7); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; padding: 6px 12px; }
 .btn-danger:active { border-color: var(--red); color: var(--red); }
 
 /* ── SPESA MODE HEADER ── */
@@ -194,14 +194,14 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Playfair Display', sans-serif;
   letter-spacing: 1.5px;
   font-size: 15px;
 }
 .spesa-header-bar.show { display: flex; }
 .btn-fine-spesa {
   background: #111; color: var(--gold); border: 1px solid #111;
-  border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 12px;
+  border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 12px;
   font-weight: 600; padding: 6px 14px; cursor: pointer; white-space: nowrap;
 }
 .btn-fine-spesa:active { background: #000; }
@@ -213,7 +213,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 
 /* ── PREFERITI HEADER ACTIONS ── */
 .pref-actions { display: flex; align-items: center; gap: 8px; padding: 0 16px 14px; }
-.btn-sel-all { background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 7px; color: var(--gold); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; flex: 1; text-align: center; }
+.btn-sel-all { background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 7px; color: var(--gold); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; flex: 1; text-align: center; }
 .btn-sel-all:active { background: var(--gold); color: #111; }
 
 /* ── SPESA ITEM (clean) ── */
@@ -243,7 +243,7 @@ main { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px
 <header>
   <div class="header-top" style="gap:10px;">
     <a href="../index.html" class="pio-home" aria-label="Torna alla home POL-IN-ONE">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
     </a>
     <div class="title-block" style="flex:1;">
       <h1 id="mainTitle">LISTA <span style="color:var(--gold)">SPESA</span></h1>

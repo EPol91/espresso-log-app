@@ -1,25 +1,26 @@
 /* Font locali POL-IN-ONE — offline, nessuna dipendenza CDN */
+/* Display: Playfair Display · Testo: Inter */
 @font-face{
-  font-family:'Bebas Neue'; font-style:normal; font-weight:400; font-display:swap;
-  src:url('bebas-neue-latin-400-normal.woff2') format('woff2');
+  font-family:'Playfair Display'; font-style:normal; font-weight:500; font-display:swap;
+  src:url('playfair-display-latin-500-normal.woff2') format('woff2');
 }
 @font-face{
-  font-family:'DM Sans'; font-style:normal; font-weight:300; font-display:swap;
-  src:url('dm-sans-latin-300-normal.woff2') format('woff2');
+  font-family:'Playfair Display'; font-style:normal; font-weight:600; font-display:swap;
+  src:url('playfair-display-latin-600-normal.woff2') format('woff2');
 }
 @font-face{
-  font-family:'DM Sans'; font-style:normal; font-weight:400; font-display:swap;
-  src:url('dm-sans-latin-400-normal.woff2') format('woff2');
+  font-family:'Playfair Display'; font-style:normal; font-weight:700; font-display:swap;
+  src:url('playfair-display-latin-700-normal.woff2') format('woff2');
 }
 @font-face{
-  font-family:'DM Sans'; font-style:italic; font-weight:400; font-display:swap;
-  src:url('dm-sans-latin-400-italic.woff2') format('woff2');
+  font-family:'Inter'; font-style:normal; font-weight:400; font-display:swap;
+  src:url('inter-latin-400-normal.woff2') format('woff2');
 }
 @font-face{
-  font-family:'DM Sans'; font-style:normal; font-weight:500; font-display:swap;
-  src:url('dm-sans-latin-500-normal.woff2') format('woff2');
+  font-family:'Inter'; font-style:normal; font-weight:500; font-display:swap;
+  src:url('inter-latin-500-normal.woff2') format('woff2');
 }
 @font-face{
-  font-family:'DM Sans'; font-style:normal; font-weight:600; font-display:swap;
-  src:url('dm-sans-latin-600-normal.woff2') format('woff2');
+  font-family:'Inter'; font-style:normal; font-weight:600; font-display:swap;
+  src:url('inter-latin-600-normal.woff2') format('woff2');
 }

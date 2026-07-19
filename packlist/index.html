@@ -8,22 +8,22 @@
 <style>
   :root {
     --bg: #111;
-    --gold: #C9A84C;
-    --gold-dim: rgba(201,168,76,0.13);
-    --gold-b: rgba(201,168,76,0.35);
+    --gold: #D4AF37;
+    --gold-dim: rgba(212,175,55,0.13);
+    --gold-b: rgba(212,175,55,0.35);
     --red: #BF1E2D;
     --ow: #f0ede8;
     --g2: #1a1a1a;
     --g3: #2a2a2a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ow); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 20px 14px 80px; }
+  body { background: var(--bg); color: var(--ow); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 20px 14px 80px; }
 
-  .pio-home{position:absolute;left:0;top:0;width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;text-decoration:none;}
+  .pio-home{position:absolute;left:0;top:0;width:38px;height:38px;border-radius:10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.4);display:flex;align-items:center;justify-content:center;text-decoration:none;}
   .pio-home:active{transform:scale(0.92);}
   .pio-home svg{width:20px;height:20px;}
   header { position: relative; text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--gold-b); }
-  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 2px; color: var(--ow); line-height: 1; }
+  h1 { font-family: 'Playfair Display', sans-serif; font-size: 42px; letter-spacing: 2px; color: var(--ow); line-height: 1; }
   h1 span { color: var(--gold); }
   .meta { margin-top: 6px; font-size: 11px; color: #555; letter-spacing: 1px; text-transform: uppercase; }
 
@@ -35,7 +35,7 @@
   .filter-bar { display: flex; justify-content: center; margin-bottom: 20px; }
   .filter-btn {
     background: transparent; border: 1px solid #333; color: #666;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
     padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all .2s;
   }
   .filter-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
@@ -45,7 +45,7 @@
   .sec-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--gold-b); }
   .sec-icon { font-size: 16px; flex-shrink: 0; }
   .sec-title-input {
-    font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 2px; color: var(--gold);
+    font-family: 'Playfair Display', sans-serif; font-size: 17px; letter-spacing: 2px; color: var(--gold);
     background: transparent; border: none; outline: none; flex: 1; min-width: 0;
     border-bottom: 1px solid transparent;
   }
@@ -57,7 +57,7 @@
 
   /* ITEM - two rows */
   .item { background: var(--g2); border: 1px solid #222; border-radius: 8px; padding: 10px 10px 8px; transition: opacity .2s; }
-  .item.done { background: var(--gold-dim); border-color: rgba(201,168,76,0.35); }
+  .item.done { background: var(--gold-dim); border-color: rgba(212,175,55,0.35); }
   .item.hidden { opacity: 0.2; }
 
   /* Row 1: checkbox + label */
@@ -84,12 +84,12 @@
 
   /* Row 2: buttons */
   .item-btns { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 7px; border-top: 1px solid #222; }
-  .item.done .item-btns { border-top-color: rgba(201,168,76,0.2); }
+  .item.done .item-btns { border-top-color: rgba(212,175,55,0.2); }
 
   .ibtn {
     height: 28px; border: none; border-radius: 6px; cursor: pointer;
     font-size: 12px; display: flex; align-items: center; justify-content: center;
-    font-family: 'DM Sans', sans-serif; font-weight: 500; padding: 0 10px;
+    font-family: 'Inter', sans-serif; font-weight: 500; padding: 0 10px;
     transition: background .15s;
   }
   .ibtn:disabled { opacity: 0.18; cursor: default; }
@@ -99,7 +99,7 @@
   .btn-eye  { background: rgba(255,255,255,0.05); color: #777; }
   .btn-del  { background: rgba(191,30,45,0.15); color: var(--red); margin-left: auto; }
 
-  .item.hidden .btn-eye { color: var(--gold); background: rgba(201,168,76,0.1); }
+  .item.hidden .btn-eye { color: var(--gold); background: rgba(212,175,55,0.1); }
 
   .ibtn:active { opacity: 0.7; }
 
@@ -107,7 +107,7 @@
   .item-label-input {
     font-size: 14px; color: var(--ow); line-height: 1.4; flex: 1;
     background: transparent; border: none; outline: none; padding: 0;
-    font-family: 'DM Sans', sans-serif; word-break: break-word;
+    font-family: 'Inter', sans-serif; word-break: break-word;
     border-bottom: 1px solid transparent;
   }
   .item-label-input:focus { border-bottom-color: #444; }
@@ -116,24 +116,24 @@
 
   /* Add row */
   .add-row { display: flex; gap: 7px; margin-top: 8px; }
-  .add-input { flex: 1; background: var(--g2); border: 1px dashed #2e2e2e; border-radius: 6px; padding: 9px 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ow); outline: none; }
+  .add-input { flex: 1; background: var(--g2); border: 1px dashed #2e2e2e; border-radius: 6px; padding: 9px 11px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ow); outline: none; }
   .add-input::placeholder { color: #3a3a3a; }
   .add-input:focus { border-color: var(--gold-b); border-style: solid; }
-  .add-btn { background: transparent; border: 1px solid var(--gold-b); color: var(--gold); font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px; padding: 0 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .add-btn { background: transparent; border: 1px solid var(--gold-b); color: var(--gold); font-family: 'Playfair Display', sans-serif; font-size: 14px; letter-spacing: 1px; padding: 0 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
 
   .add-sec-wrap { margin: 4px 0 0; }
-  .add-sec-btn { width: 100%; padding: 11px; background: transparent; border: 1px dashed #222; border-radius: 6px; color: #333; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .add-sec-btn { width: 100%; padding: 11px; background: transparent; border: 1px dashed #222; border-radius: 6px; color: #333; font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; }
   .add-sec-btn:active { border-color: var(--gold-b); color: var(--gold); }
 
   .bottom { margin: 28px 0 0; display: flex; justify-content: center; }
-  .reset-btn { background: transparent; border: 1px solid #222; color: #333; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 22px; border-radius: 4px; cursor: pointer; }
+  .reset-btn { background: transparent; border: 1px solid #222; color: #333; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 22px; border-radius: 4px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <header>
   <a href="../index.html" class="pio-home" aria-label="Torna alla home POL-IN-ONE">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
   </a>
   <h1>PACK<span>LIST</span></h1>
   <div class="meta">Mare + Palestra · 11 giorni · Caldo · Lavatrice disponibile</div>

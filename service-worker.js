@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v4';
+const CACHE_NAME = 'pol-in-one-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -6,17 +6,18 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png',
+  './tracking-peso/index.html',
   './rice-cor/index.html',
   './polspresso/index.html',
   './lista-spesa/index.html',
   './packlist/index.html',
   './fonts/fonts.css',
-  './fonts/bebas-neue-latin-400-normal.woff2',
-  './fonts/dm-sans-latin-300-normal.woff2',
-  './fonts/dm-sans-latin-400-normal.woff2',
-  './fonts/dm-sans-latin-400-italic.woff2',
-  './fonts/dm-sans-latin-500-normal.woff2',
-  './fonts/dm-sans-latin-600-normal.woff2'
+  './fonts/playfair-display-latin-500-normal.woff2',
+  './fonts/playfair-display-latin-600-normal.woff2',
+  './fonts/playfair-display-latin-700-normal.woff2',
+  './fonts/inter-latin-400-normal.woff2',
+  './fonts/inter-latin-500-normal.woff2',
+  './fonts/inter-latin-600-normal.woff2'
 ];
 
 self.addEventListener('install', (e) => {

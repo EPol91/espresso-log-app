@@ -15,13 +15,13 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root{
-    --bg:#0d0d0d; --panel:#1a1a1a; --gold:#C9A84C;
-    --gold-dim:rgba(201,168,76,0.13); --gold-b:rgba(201,168,76,0.3);
+    --bg:#0d0d0d; --panel:#1a1a1a; --gold:#D4AF37;
+    --gold-dim:rgba(212,175,55,0.13); --gold-b:rgba(212,175,55,0.3);
     --cream:#f0ede8; --muted:#888; --line:#222;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{
-    background:var(--bg); color:var(--cream); font-family:'DM Sans',sans-serif;
+    background:var(--bg); color:var(--cream); font-family:'Inter',sans-serif;
     min-height:100vh; padding:28px 16px calc(28px + env(safe-area-inset-bottom));
     display:flex; flex-direction:column; align-items:center;
   }
@@ -31,7 +31,7 @@
     border-bottom:1px solid var(--gold-b);
   }
   .logo{
-    font-family:'Bebas Neue',sans-serif; font-size:clamp(40px,13vw,58px);
+    font-family:'Playfair Display',sans-serif; font-size:clamp(40px,13vw,58px);
     letter-spacing:4px; line-height:1; color:var(--cream);
   }
   .logo span{ color:var(--gold); }
@@ -53,7 +53,7 @@
   .tile-ico svg{ width:27px; height:27px; }
   .tile-txt{ flex:1; min-width:0; }
   .tile-name{
-    font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:1.5px; color:var(--cream);
+    font-family:'Playfair Display',sans-serif; font-size:21px; letter-spacing:1.5px; color:var(--cream);
   }
   .tile-sub{ font-size:11.5px; color:var(--muted); margin-top:1px; }
   .tile-arrow{ color:var(--muted); flex-shrink:0; }
@@ -63,7 +63,7 @@
     border-style:dashed; border-color:#2e2e2e; background:transparent;
   }
   .tile.soon .tile-ico{ background:rgba(255,255,255,0.03); }
-  .tile.soon .tile-name{ font-family:'DM Sans',sans-serif; font-size:13px; letter-spacing:0; color:var(--muted); }
+  .tile.soon .tile-name{ font-family:'Inter',sans-serif; font-size:13px; letter-spacing:0; color:var(--muted); }
   footer{ margin-top:26px; text-align:center; font-size:10px; letter-spacing:1px; color:#3a3a3a; }
 </style>
 </head>
@@ -77,9 +77,20 @@
 
   <div class="tiles">
 
-    <a class="tile primary" href="rice-cor/index.html">
+    <a class="tile primary" href="tracking-peso/index.html">
       <div class="tile-ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M2 11h20"/><path d="M8 7.5c-.3-1 .6-1.6.6-2.6M12 7.5c-.3-1 .6-1.6.6-2.6M16 7.5c-.3-1 .6-1.6.6-2.6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 12l3-3.2"/><path d="M8.5 12a3.5 3.5 0 0 1 7 0"/></svg>
+      </div>
+      <div class="tile-txt">
+        <div class="tile-name">TRACKING PESO</div>
+        <div class="tile-sub">Peso · media settimanale · FFMI</div>
+      </div>
+      <span class="tile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="tile" href="rice-cor/index.html">
+      <div class="tile-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M2 11h20"/><path d="M8 7.5c-.3-1 .6-1.6.6-2.6M12 7.5c-.3-1 .6-1.6.6-2.6M16 7.5c-.3-1 .6-1.6.6-2.6"/></svg>
       </div>
       <div class="tile-txt">
         <div class="tile-name">RICE &amp; COR</div>
@@ -90,7 +101,7 @@
 
     <a class="tile" href="polspresso/index.html">
       <div class="tile-ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 3.5c0 1-.8 1.5-.8 2.5M11.5 3.5c0 1-.8 1.5-.8 2.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 3.5c0 1-.8 1.5-.8 2.5M11.5 3.5c0 1-.8 1.5-.8 2.5"/></svg>
       </div>
       <div class="tile-txt">
         <div class="tile-name">POLSPRESSO</div>
@@ -101,7 +112,7 @@
 
     <a class="tile" href="lista-spesa/index.html">
       <div class="tile-ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 4h2l2.4 11.5a1.5 1.5 0 0 0 1.5 1.2h8a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 4h2l2.4 11.5a1.5 1.5 0 0 0 1.5 1.2h8a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>
       </div>
       <div class="tile-txt">
         <div class="tile-name">LISTA SPESA</div>
@@ -112,7 +123,7 @@
 
     <a class="tile" href="packlist/index.html">
       <div class="tile-ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3"/><path d="M9 11v5M15 11v5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3"/><path d="M9 11v5M15 11v5"/></svg>
       </div>
       <div class="tile-txt">
         <div class="tile-name">PACKLIST</div>
