@@ -485,8 +485,8 @@
       </div>
       <div class="notif-status" id="n_status"></div>
       <div class="push-adv">
-        <button type="button" class="push-btn" id="pushBtn" onclick="setupPush()">Attiva notifica puntuale (07:30, anche ad app chiusa)</button>
-        <div class="notif-sub" id="pushHint">Best-effort. Per la notifica garantita ad app chiusa serve incollare una volta il "recapito" su GitHub.</div>
+        <button type="button" class="push-btn" id="pushBtn" onclick="setupPush()">Attiva notifica puntuale ad app chiusa (push)</button>
+        <div class="notif-sub" id="pushHint">L'orario della notifica push si imposta su GitHub (variabile REMIND_TIME, default 07:30). Qui generi una volta il "recapito" da incollare nei secret.</div>
         <textarea id="pushSub" readonly style="display:none;"></textarea>
         <button type="button" class="push-copy" id="pushCopy" style="display:none;" onclick="copyPushSub()">Copia recapito push</button>
       </div>

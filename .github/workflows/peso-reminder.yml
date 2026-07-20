@@ -2,8 +2,7 @@ name: Promemoria peso
 
 on:
   schedule:
-    - cron: '30 5 * * *'   # 07:30 Italia con ora legale (estate, UTC+2)
-    - cron: '30 6 * * *'   # 07:30 Italia con ora solare (inverno, UTC+1)
+    - cron: '*/30 * * * *'   # ogni 30 min; lo script invia solo all'ora scelta (REMIND_TIME) in Italia
   workflow_dispatch:        # invio manuale di test
     inputs:
       force:
@@ -29,4 +28,5 @@ jobs:
           VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          REMIND_TIME: ${{ vars.REMIND_TIME }}
           FORCE: ${{ inputs.force }}

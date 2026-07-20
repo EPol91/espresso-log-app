@@ -8,10 +8,12 @@ const VAPID_PRIVATE = process.env.VAPID_PRIVATE;
 const SUBJECT = process.env.VAPID_SUBJECT || 'mailto:emanuel.pol91@gmail.com';
 const SUB_RAW = process.env.PUSH_SUBSCRIPTION;
 
-// Orario target in Italia (default 07:30) e finestra di tolleranza (min).
-const TH = parseInt(process.env.REMIND_H || '7', 10);
-const TM = parseInt(process.env.REMIND_M || '30', 10);
-const WINDOW = 30;
+// Orario target in Italia — impostabile con la repo Variable REMIND_TIME (formato "HH:MM",
+// solo mezz'ore: es. 07:30, 11:00, 11:30). Default 07:30. Finestra di tolleranza in minuti.
+const RT = (process.env.REMIND_TIME || '07:30').split(':');
+const TH = parseInt(RT[0], 10) || 7;
+const TM = parseInt(RT[1], 10) || 0;
+const WINDOW = 14;
 
 if (!VAPID_PRIVATE) { console.error('Manca il secret VAPID_PRIVATE'); process.exit(1); }
 if (!SUB_RAW) { console.error('Manca il secret PUSH_SUBSCRIPTION'); process.exit(1); }
