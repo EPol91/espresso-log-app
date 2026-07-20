@@ -183,6 +183,11 @@
   .switch .track::before{content:'';position:absolute;height:19px;width:19px;left:3px;top:3px;background:#8f897b;border-radius:50%;transition:.2s}
   .switch input:checked + .track{background:var(--gold);border-color:var(--gold)}
   .switch input:checked + .track::before{transform:translateX(19px);background:#0d0d0d}
+  .push-adv{margin-top:14px;padding-top:14px;border-top:1px solid #242424}
+  .push-btn{width:100%;background:transparent;border:1px solid var(--gold-b,rgba(212,175,55,.4));color:var(--gold);border-radius:10px;padding:11px;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer}
+  .push-btn:active{background:rgba(212,175,55,.1)}
+  #pushSub{width:100%;height:70px;margin-top:10px;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:8px;color:#8f897b;font-family:monospace;font-size:10px;padding:8px;resize:vertical}
+  .push-copy{width:100%;margin-top:8px;background:var(--gold);color:#0d0d0d;border:none;border-radius:8px;padding:10px;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer}
 
   /* ================= DARK VARIANT ================= */
   html,body{background:#0d0d0d}
@@ -479,6 +484,12 @@
         <input id="n_time" type="time" value="07:30" onchange="saveNotif(true)">
       </div>
       <div class="notif-status" id="n_status"></div>
+      <div class="push-adv">
+        <button type="button" class="push-btn" id="pushBtn" onclick="setupPush()">Attiva notifica puntuale (07:30, anche ad app chiusa)</button>
+        <div class="notif-sub" id="pushHint">Best-effort. Per la notifica garantita ad app chiusa serve incollare una volta il "recapito" su GitHub.</div>
+        <textarea id="pushSub" readonly style="display:none;"></textarea>
+        <button type="button" class="push-copy" id="pushCopy" style="display:none;" onclick="copyPushSub()">Copia recapito push</button>
+      </div>
     </div>
   </aside>
 
@@ -744,6 +755,27 @@ document.getElementById('e_date').addEventListener('change',function(e){document
 /* init */
 /* ===== Notifiche e promemoria ===== */
 var NKEY='pol_notif_v1';
+/* Web Push (spinto dalla GitHub Action alle 07:30) */
+var VAPID_PUBLIC='BHjSMO8NpAtmamGNWSd8XeR11-cTVPpgkNCE0SbTcSGWph-iRFk_eh_7RNg8GD4EWxAM2KZ32P2alCVTrFpuGAA';
+function urlB64ToUint8(b64){var pad='='.repeat((4-b64.length%4)%4);var s=(b64+pad).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(s);var a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a;}
+function setupPush(){
+  var hint=document.getElementById('pushHint');
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){ hint.textContent='Questo browser non supporta il push.'; return; }
+  var perm=('Notification' in window && Notification.permission==='default')?Notification.requestPermission():Promise.resolve(Notification.permission);
+  perm.then(function(){
+    if(('Notification' in window)&&Notification.permission!=='granted'){ hint.textContent='Permesso notifiche negato: sbloccalo per il push.'; return; }
+    navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription().then(function(sub){
+        return sub || reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)});
+      });
+    }).then(function(sub){
+      var ta=document.getElementById('pushSub'); ta.value=JSON.stringify(sub); ta.style.display='block';
+      document.getElementById('pushCopy').style.display='block';
+      hint.innerHTML='Recapito generato ✓ Copialo e incollalo nel secret <b>PUSH_SUBSCRIPTION</b> su GitHub (Settings → Secrets → Actions).';
+    }).catch(function(e){ hint.textContent='Errore iscrizione push: '+(e&&e.message||e); });
+  });
+}
+function copyPushSub(){var ta=document.getElementById('pushSub');ta.select();try{document.execCommand('copy');}catch(e){}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value);}toast('Recapito copiato');}
 function getNotif(){try{return JSON.parse(localStorage.getItem(NKEY))||{};}catch(e){return {};}}
 function setNotif(o){try{localStorage.setItem(NKEY,JSON.stringify(o));}catch(e){}}
 function pesoCfg(){var o=getNotif();return o.peso||{enabled:false,time:'07:30'};}

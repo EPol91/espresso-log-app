@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v12';
+const CACHE_NAME = 'pol-in-one-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -53,6 +53,16 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(req).then(cached => cached || fetch(req))
   );
+});
+
+// Web Push (spinto dalla GitHub Action) → mostra notifica anche ad app chiusa
+self.addEventListener('push', (e) => {
+  let d = { title: 'Promemoria peso', body: 'Registra il peso di oggi' };
+  try { if(e.data) d = Object.assign(d, e.data.json()); } catch(x){}
+  e.waitUntil(self.registration.showNotification(d.title, {
+    body: d.body, tag: 'peso-now', data: { url: 'tracking-peso/index.html' },
+    icon: './icon-192.png', badge: './icon-192.png'
+  }));
 });
 
 // Tap su una notifica → apre/porta in primo piano l'app (sul modulo giusto)

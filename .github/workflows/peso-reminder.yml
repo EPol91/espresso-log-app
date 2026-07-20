@@ -1,0 +1,26 @@
+name: Promemoria peso
+
+on:
+  schedule:
+    - cron: '30 5 * * *'   # 07:30 Italia con ora legale (estate, UTC+2)
+    - cron: '30 6 * * *'   # 07:30 Italia con ora solare (inverno, UTC+1)
+  workflow_dispatch: {}     # permette l'invio manuale di test
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        working-directory: push-sender
+        run: npm install --no-audit --no-fund
+      - name: Send push
+        working-directory: push-sender
+        run: node send.js
+        env:
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+          PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
