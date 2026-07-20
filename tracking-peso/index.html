@@ -746,6 +746,24 @@ document.getElementById('e_date').addEventListener('change',function(e){document
 var NKEY='pol_notif_v1';
 function getNotif(){try{return JSON.parse(localStorage.getItem(NKEY))||{};}catch(e){return {};}}
 function setNotif(o){try{localStorage.setItem(NKEY,JSON.stringify(o));}catch(e){}}
+// Mirror in IndexedDB (il service worker non legge localStorage)
+function idbPut(key,val){try{var r=indexedDB.open('pol_db',1);r.onupgradeneeded=function(){if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv');};r.onsuccess=function(){var tx=r.result.transaction('kv','readwrite');tx.objectStore('kv').put(val,key);};}catch(e){}}
+function mirrorNotif(){
+  var c=pesoCfg(), o=getNotif();
+  var dates=state.entries.map(function(e){return e.date;}).sort();
+  idbPut('peso',{enabled:!!c.enabled, time:c.time||'07:30', lastEntryDate:dates.length?dates[dates.length-1]:'', lastNotifiedDate:(o.peso&&o.peso.lastNotified)||''});
+}
+function registerBgSync(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(function(reg){
+    if('periodicSync' in reg){
+      navigator.permissions.query({name:'periodic-background-sync'}).then(function(st){
+        if(st.state==='granted'){ reg.periodicSync.register('peso-check',{minInterval:6*60*60*1000}).catch(function(){}); }
+      }).catch(function(){});
+    }
+    if('sync' in reg){ reg.sync.register('peso-check').catch(function(){}); }
+  }).catch(function(){});
+}
 function pesoCfg(){var o=getNotif();return o.peso||{enabled:false,time:'07:30'};}
 function pesoPending(){
   var c=pesoCfg(); if(!c.enabled) return false;
@@ -771,7 +789,9 @@ function refreshNotifStatus(){
   var perm=('Notification' in window)?Notification.permission:'unsupported';
   if(perm==='granted'){
     var trig=('Notification' in window)&&('showTrigger' in Notification.prototype);
-    el.innerHTML='Attivo alle <b>'+(c.time||'07:30')+'</b>. '+(trig?'Programmato anche ad app chiusa.':'Ad app chiusa il sistema potrebbe non avvisarti; vedrai badge e notifica alla riapertura.');
+    var psync=false; try{ psync=('serviceWorker' in navigator); }catch(e){}
+    var bg = trig ? 'Programmazione precisa ad app chiusa attiva.' : 'Ad app chiusa: risveglio periodico del sistema (orario approssimato) + badge e notifica alla riapertura.';
+    el.innerHTML='Attivo alle <b>'+(c.time||'07:30')+'</b>. '+bg+'<br><span style="color:#6f6a5e">Background: Triggers '+(trig?'sì':'no')+' · PeriodicSync '+(psync?'da verificare':'no')+'</span>';
     el.className='notif-status';
   }else if(perm==='denied'){ el.textContent='Notifiche bloccate dal browser (sbloccale nelle impostazioni del sito). Il badge funziona comunque.'; el.className='notif-status warn'; }
   else if(perm==='unsupported'){ el.textContent='Questo browser non supporta le notifiche. Resta il badge.'; el.className='notif-status warn'; }
@@ -788,8 +808,8 @@ function onNotifToggle(){
 function saveNotif(reschedule){
   var o=getNotif(), prev=o.peso||{};
   o.peso={enabled:document.getElementById('n_enabled').checked, time:document.getElementById('n_time').value||'07:30', lastNotified:prev.lastNotified};
-  setNotif(o); refreshNotifStatus(); updateBadge();
-  if(reschedule) scheduleTriggers();
+  setNotif(o); refreshNotifStatus(); updateBadge(); mirrorNotif();
+  if(reschedule){ scheduleTriggers(); registerBgSync(); }
 }
 function scheduleTriggers(){
   if(!('serviceWorker' in navigator)) return;
@@ -818,7 +838,7 @@ function fireReminderIfDue(){
   o.peso=o.peso||{}; o.peso.lastNotified=t; setNotif(o);
 }
 function clearPesoNotif(){
-  updateBadge();
+  updateBadge(); mirrorNotif();
   if('serviceWorker' in navigator){ navigator.serviceWorker.ready.then(function(reg){ reg.getNotifications({tag:'peso-now'}).then(function(l){l.forEach(function(n){n.close();});}); }).catch(function(){}); }
 }
 
@@ -828,7 +848,9 @@ syncMA();
 render();
 loadNotifUI();
 fireReminderIfDue();
-document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ fireReminderIfDue(); scheduleTriggers(); } });
+mirrorNotif();
+registerBgSync();
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'){ fireReminderIfDue(); scheduleTriggers(); mirrorNotif(); } });
 var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(drawCharts,150);});
 window.addEventListener('load',function(){ drawCharts(); scheduleTriggers(); });
 </script>
