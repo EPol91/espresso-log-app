@@ -4,7 +4,12 @@ on:
   schedule:
     - cron: '30 5 * * *'   # 07:30 Italia con ora legale (estate, UTC+2)
     - cron: '30 6 * * *'   # 07:30 Italia con ora solare (inverno, UTC+1)
-  workflow_dispatch: {}     # permette l'invio manuale di test
+  workflow_dispatch:        # invio manuale di test
+    inputs:
+      force:
+        description: "Invia subito anche fuori orario (test)"
+        type: boolean
+        default: true
 
 jobs:
   send:
@@ -24,3 +29,4 @@ jobs:
           VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          FORCE: ${{ inputs.force }}

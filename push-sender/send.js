@@ -25,10 +25,12 @@ const rm = parseInt(parts.find(p => p.type === 'minute').value, 10);
 const nowMin = rh * 60 + rm;
 const tgtMin = TH * 60 + TM;
 
-if (Math.abs(nowMin - tgtMin) > WINDOW) {
+const FORCE = String(process.env.FORCE || '').toLowerCase() === 'true';
+if (!FORCE && Math.abs(nowMin - tgtMin) > WINDOW) {
   console.log(`In Italia sono ${rh}:${String(rm).padStart(2,'0')}, non è ~${TH}:${String(TM).padStart(2,'0')}. Nessun invio.`);
   process.exit(0);
 }
+if (FORCE) console.log('FORCE attivo: invio di test fuori orario.');
 
 let sub;
 try { sub = JSON.parse(SUB_RAW); } catch (e) { console.error('PUSH_SUBSCRIPTION non è JSON valido'); process.exit(1); }
