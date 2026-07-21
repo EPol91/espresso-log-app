@@ -2,13 +2,16 @@ name: Promemoria peso
 
 on:
   schedule:
-    - cron: '*/30 * * * *'   # ogni 30 min; lo script invia solo all'ora scelta (REMIND_TIME) in Italia
+    - cron: '*/15 * * * *'   # ogni 15 min; lo script invia una volta al giorno, al primo run dopo REMIND_TIME (Italia)
   workflow_dispatch:        # invio manuale di test
     inputs:
       force:
         description: "Invia subito anche fuori orario (test)"
         type: boolean
         default: true
+
+permissions:
+  contents: write            # per salvare il marker anti-doppione
 
 jobs:
   send:
@@ -30,3 +33,15 @@ jobs:
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
           REMIND_TIME: ${{ vars.REMIND_TIME }}
           FORCE: ${{ inputs.force }}
+      - name: Salva marker (una volta al giorno)
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain push-sender/.last-sent)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add push-sender/.last-sent
+            git commit -m "chore: promemoria peso inviato"
+            git push
+          else
+            echo "Nessun marker da salvare."
+          fi
