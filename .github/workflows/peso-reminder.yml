@@ -1,8 +1,8 @@
 name: Promemoria peso
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'   # ogni 15 min; lo script invia una volta al giorno, al primo run dopo REMIND_TIME (Italia)
+  # Schedule DISABILITATA: lo scheduling affidabile è passato a Cloudflare Workers (le cron di GitHub saltavano interi blocchi).
+  # Resta solo l'invio manuale come riserva.
   workflow_dispatch:        # invio manuale di test
     inputs:
       force:
