@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pol-in-one-v13';
+const CACHE_NAME = 'pol-in-one-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -61,7 +61,8 @@ self.addEventListener('push', (e) => {
   try { if(e.data) d = Object.assign(d, e.data.json()); } catch(x){}
   e.waitUntil(self.registration.showNotification(d.title, {
     body: d.body, tag: 'peso-now', data: { url: 'tracking-peso/index.html' },
-    icon: './icon-192.png', badge: './icon-192.png'
+    icon: './icon-192.png', badge: './icon-192.png',
+    vibrate: [200, 100, 200], requireInteraction: true, renotify: true, silent: false
   }));
 });
 
